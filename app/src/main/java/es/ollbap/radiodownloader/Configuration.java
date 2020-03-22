@@ -30,10 +30,10 @@ class Configuration {
 
     //Alarms configuration
     public static final int ALARM_WEEKEND_HOUR = 8;
-    public static final int ALARM_WEEKEND_MINUTE = 1;
+    public static final int ALARM_WEEKEND_MINUTE = 0;
 
     public static final int ALARM_WEEKDAY_HOUR = 6;
-    public static final int ALARM_WEEKDAY_MINUTE = 1;
+    public static final int ALARM_WEEKDAY_MINUTE = 0;
 
     private static final String FOREGROUND_NOTIFICATION_CHANEL_ID = "FOREGROUND_NOTIFICATION_CHANEL";
 

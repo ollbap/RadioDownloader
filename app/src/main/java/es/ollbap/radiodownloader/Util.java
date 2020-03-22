@@ -21,6 +21,7 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by ollbap on 1/13/18.
@@ -32,7 +33,7 @@ public final class Util {
     private Util() {}
 
     public static String getTimeTag() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss", Locale.ENGLISH);
         return simpleDateFormat.format(new Date());
     }
 
@@ -51,7 +52,19 @@ public final class Util {
     public static void log(String tag, String message, Throwable eToLog) {
         File logFile = Configuration.getRadioLogOutputFile();
 
-        try (PrintStream out = new PrintStream( new FileOutputStream(logFile, true))) {
+        switch (tag) {
+            case "ERROR": Log.e("Util", message, eToLog);
+            default: Log.i("Util", message, eToLog);
+        }
+
+        File containingDir = logFile.getParentFile();
+        if (containingDir != null && !containingDir.exists()) {
+            containingDir.mkdirs();
+        }
+
+        boolean append = logFile.exists();
+
+        try (PrintStream out = new PrintStream(new FileOutputStream(logFile, append))) {
             Log.i("DownloadTask", message);
             out.println(getTimeTag() + " "+tag+" " + message);
             out.flush();
@@ -59,7 +72,7 @@ public final class Util {
                 eToLog.printStackTrace(out);
             }
         } catch (FileNotFoundException ex) {
-            Log.e("Util", "Can not write lot", ex);
+            Log.e("Util", "Can not write log", ex);
         }
     }
 
@@ -164,7 +177,7 @@ public final class Util {
         intent.setAction("com.example.android.repeatingalarm");
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, PROGRAM_DOWNLOAD_REQUEST_CODE, intent, 0);
         alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
         logI("Alarm programmed at: "+format.format(alarmTime));
     }
 

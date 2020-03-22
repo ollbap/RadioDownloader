@@ -35,7 +35,7 @@ import androidx.fragment.app.FragmentTransaction;
  * A simple launcher activity containing a summary sample description
  * and a few action bar buttons.
  */
-public class MainActivity extends FragmentActivity {
+public class LegacyMainActivity extends FragmentActivity {
     public static final String URL = "http://19093.live.streamtheworld.com:80/CADENASER_SC";
 
     public static final String TAG = "MainActivity";

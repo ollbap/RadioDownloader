@@ -69,15 +69,15 @@ public class ForegroundService extends Service {
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_next, "Stop",
-                        createServicePendintIntent(ACTION.STOP_FOREGROUND))
+                        createServicePendingIntent(ACTION.STOP_FOREGROUND))
                 .addAction(android.R.drawable.ic_media_ff, "Alarm",
-                        createServicePendintIntent(ACTION.PERIODIC_ALARM))
+                        createServicePendingIntent(ACTION.PERIODIC_ALARM))
                 .addAction(android.R.drawable.ic_media_play, "VLC",
-                        createServicePendintIntent(ACTION.VLC_START));
+                        createServicePendingIntent(ACTION.VLC_START));
 
     }
 
-    private PendingIntent createServicePendintIntent(String action) {
+    private PendingIntent createServicePendingIntent(String action) {
         Intent intent = new Intent(this, ForegroundService.class);
         intent.setAction(action);
         return PendingIntent.getService(this, 0,
@@ -113,27 +113,13 @@ public class ForegroundService extends Service {
             } else if (action.equals(ACTION.PERIODIC_ALARM)) {
                 startPeriodicAlarm();
             } else if (action.equals(ACTION.VLC_START)) {
-                startVlc();
+                startVlc(this);
             }
             return START_STICKY; // Send a NULL intent if the service is killed.
         } catch (Exception e) {
             logE("Unexpected exception", e);
             throw e;
         }
-    }
-
-    private void startVlc() {
-        File outputFile = Configuration.getRadioOutputFile();
-
-        Uri uri = Uri.fromFile(outputFile);
-        Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
-        vlcIntent.setPackage("org.videolan.vlc");
-        vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
-        vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
-        vlcIntent.putExtra("title", "Radio Download");
-        vlcIntent.putExtra("from_start", false);
-        vlcIntent.putExtra("position", 0L);
-        startActivity(vlcIntent);
     }
 
     private void startPeriodicAlarm() {
@@ -214,7 +200,7 @@ public class ForegroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(LOG_TAG, "In onDestroy");
-        Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Service Destroyed!", Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -2,8 +2,10 @@ package es.ollbap.radiodownloader;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -293,6 +295,29 @@ public final class Util {
 
     public static String resolvePls(String url) {
         return resolvePlsInternal(url);
+    }
+
+    public static void playRadioFile(Context context) {
+        File outputFile = Configuration.getRadioOutputFile();
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(outputFile), "audio/*");
+        context.startActivity(intent);
+    }
+
+    public static void startVlc(Context context) {
+        File outputFile = Configuration.getRadioOutputFile();
+
+        Uri uri = Uri.fromFile(outputFile);
+        Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
+        vlcIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        vlcIntent.setPackage("org.videolan.vlc");
+        vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
+        vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
+        vlcIntent.putExtra("title", "Radio Download");
+        vlcIntent.putExtra("from_start", false);
+        vlcIntent.putExtra("position", 0L);
+        context.startActivity(vlcIntent);
     }
 
 }

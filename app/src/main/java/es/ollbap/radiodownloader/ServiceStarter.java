@@ -11,7 +11,15 @@ import android.content.Intent;
 public class ServiceStarter extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Util.logI("On boot receive executed");
-        Util.programNextAlarm(context);
+        String action = intent.getAction();
+        if (action != null) {
+            switch (action) {
+                case Intent.ACTION_BOOT_COMPLETED:
+                    Util.logI("On boot receive executed");
+                    Util.programNextAlarm(context);
+                    break;
+            }
+        }
+
     }
 }

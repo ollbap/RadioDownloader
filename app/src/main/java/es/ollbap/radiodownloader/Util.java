@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -297,20 +298,27 @@ public final class Util {
         return resolvePlsInternal(url);
     }
 
-    public static void playRadioFile(Context context) {
+    public static void openRadioFile(Context context) {
         File outputFile = Configuration.getRadioOutputFile();
+        String authority = context.getApplicationContext().getPackageName() + ".provider";
+        Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
+
         Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(outputFile), "audio/*");
+        intent.setDataAndType(uri, "audio/*");
         context.startActivity(intent);
     }
 
-    public static void startVlc(Context context) {
+    public static void playInVlc(Context context) {
         File outputFile = Configuration.getRadioOutputFile();
+        String authority = context.getApplicationContext().getPackageName() + ".provider";
+        Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
 
-        Uri uri = Uri.fromFile(outputFile);
         Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
         vlcIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        vlcIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         vlcIntent.setPackage("org.videolan.vlc");
         vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
         vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");

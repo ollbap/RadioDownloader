@@ -67,8 +67,13 @@ public class MainActivity extends AppCompatActivity {
             logI("Cancel download.");
         }
 
-        if(id == R.id.open_player) {
-            Util.startVlc(this);
+        if(id == R.id.open_radio_file) {
+            Util.openRadioFile(this);
+            logI("Cancel download.");
+        }
+
+        if(id == R.id.open_vlc) {
+            Util.playInVlc(this);
             logI("Cancel download.");
         }
 

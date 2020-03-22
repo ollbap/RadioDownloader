@@ -3,12 +3,10 @@ package es.ollbap.radiodownloader;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -16,8 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
-
-import java.io.File;
 
 import static es.ollbap.radiodownloader.Util.*;
 
@@ -113,7 +109,7 @@ public class ForegroundService extends Service {
             } else if (action.equals(ACTION.PERIODIC_ALARM)) {
                 startPeriodicAlarm();
             } else if (action.equals(ACTION.VLC_START)) {
-                startVlc(this);
+                playInVlc(this);
             }
             return START_STICKY; // Send a NULL intent if the service is killed.
         } catch (Exception e) {

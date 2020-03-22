@@ -17,7 +17,10 @@
     <item android:id="@+id/cancel_download"
         app:showAsAction="ifRoom|withText"
         android:title="Cancel download" />
-    <item android:id="@+id/open_player"
+    <item android:id="@+id/open_radio_file"
         app:showAsAction="ifRoom|withText"
-        android:title="Open Radio Player" />
+        android:title="Open Radio File" />
+    <item android:id="@+id/open_vlc"
+        app:showAsAction="ifRoom|withText"
+        android:title="Play with VLC" />
 </menu>

@@ -64,8 +64,8 @@ public class ForegroundService extends Service {
                 .setContentTitle("Radio download")
                 .setTicker("Radio download")
                 .setContentText("Download")
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
+                .setSmallIcon(R.drawable.ic_launcher)
+//                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_next, "Stop",
@@ -104,8 +104,7 @@ public class ForegroundService extends Service {
             String action = intent.getAction();
             if (action == null) {
                 logE("Received action==null in service. I don't know that did this. Intent: " + intent);
-            }
-            if (action.equals(ACTION.START_FOREGROUND)) {
+            } else if (action.equals(ACTION.START_FOREGROUND)) {
                 onStartServiceAction(false);
             } else if (action.equals(ACTION.STOP_FOREGROUND)) {
                 onStopServiceAction();
@@ -133,7 +132,7 @@ public class ForegroundService extends Service {
         vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
         vlcIntent.putExtra("title", "Radio Download");
         vlcIntent.putExtra("from_start", false);
-        vlcIntent.putExtra("position", 0l);
+        vlcIntent.putExtra("position", 0L);
         startActivity(vlcIntent);
     }
 
@@ -162,24 +161,26 @@ public class ForegroundService extends Service {
 
     private void requestLocks() {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakelockTag");
-        wakeLock.acquire();
+        assert powerManager != null;
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "radiodownloader:MyWakelockTag");
+        wakeLock.acquire(5*60*60*1000L /*5 hours*/);
 
         WifiManager wMgr = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        assert wMgr != null;
         wifiLock = wMgr.createWifiLock(WifiManager.WIFI_MODE_FULL, "MyWifiLock");
         wifiLock.acquire();
     }
 
     private void releaseLocks() {
-        PowerManager.WakeLock lwakeLock = wakeLock;
-        WifiManager.WifiLock lwifiLock = wifiLock;
+        PowerManager.WakeLock lWakeLock = wakeLock;
+        WifiManager.WifiLock lWifiLock = wifiLock;
 
-        if (lwakeLock != null) {
-            lwakeLock.release();
+        if (lWakeLock != null) {
+            lWakeLock.release();
         }
 
-        if (lwifiLock != null) {
-            lwifiLock.release();
+        if (lWifiLock != null) {
+            lWifiLock.release();
         }
     }
 

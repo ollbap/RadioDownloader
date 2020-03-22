@@ -127,9 +127,9 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 return DownloadStatus.CAN_NOT_CONNECT;
             }
 
-            //Check again wifi just in case wifi was disconnected right after check but before connection is performed.
-            if (!isWifi()) {
-                logE("Download not performed because network is not wifi");
+            //Check again metered just in case wifi was disconnected right after check but before connection is performed.
+            if (isActiveNetworkMetered()) {
+                logE("Download not performed because network is metered");
                 return DownloadStatus.CONNECTION_IS_NOT_WIFI;
             }
 
@@ -258,25 +258,18 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         return url;
     }
 
-    private boolean isWifi() {
+    private boolean isActiveNetworkMetered() {
         ConnectivityManager mConnectivity =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         // Skip if no connection
         assert mConnectivity != null;
-        Network activeNetwork = mConnectivity.getActiveNetwork();
-        NetworkCapabilities activeNetworkCapabilities = mConnectivity.getNetworkCapabilities(activeNetwork);
-        if (activeNetwork == null || activeNetworkCapabilities == null) {
-            logE("Not network is found");
-            return false;
-        }
 
-        // Only update if WiFi or 3G is connected and not roaming
-        if (activeNetworkCapabilities.hasCapability(NetworkCapabilities.TRANSPORT_WIFI)) {
-            logI("Network type is wifi: " + activeNetwork);
+        if (mConnectivity.isActiveNetworkMetered()) {
+            logE("Current network is metered");
             return true;
         }
 
-        logI("Network type is not wifi: " + activeNetwork);
+        logI("Current network is not metered");
         return false;
     }
 

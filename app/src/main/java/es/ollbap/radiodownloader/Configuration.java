@@ -13,6 +13,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by ollbap on 1/20/18.
@@ -25,7 +26,7 @@ class Configuration {
 
     public static final String DOWNLOAD_FILE_NAME = "radio.mp3";
     public static final String DOWNLOAD_URL_OLD = "http://19093.live.streamtheworld.com:80/CADENASER_SC";
-    public static final String DOWNLOAD_URL = "http://playerservices.streamtheworld.com/pls/CADENASER.pls";
+    public static final String DOWNLOAD_URL = "https://playerservices.streamtheworld.com/pls/CADENASER.pls";
 
     //Alarms configuration
     public static final int ALARM_WEEKEND_HOUR = 8;
@@ -69,7 +70,7 @@ class Configuration {
     @NonNull
     public static File getOutputDirectory() {
         File outputDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_MUSIC), "radio");
+                Environment.DIRECTORY_MUSIC), "radioDownloader");
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();
@@ -80,10 +81,10 @@ class Configuration {
     private static String logTimeStampCache = null;
     public static File getRadioLogOutputFile() {
         if (logTimeStampCache == null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             logTimeStampCache = dateFormat.format(new Date());
         }
 
-        return new File(getOutputDirectory(), "radio_stream_"+logTimeStampCache+".log");
+        return new File(getOutputDirectory(), "radio_stream_"+logTimeStampCache+"_log.txt");
     }
 }

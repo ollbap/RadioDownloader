@@ -307,37 +307,41 @@ public final class Util {
         openFile(context, Configuration.getRadioOutputFile(), "audio/*");
     }
 
-    public static void openDownloadDir(Context context) {
-        openFile(context, Configuration.getOutputDirectory(), DocumentsContract.Document.MIME_TYPE_DIR);
-    }
-
     public static void openFile(Context context, File file, String type) {
-        String authority = context.getApplicationContext().getPackageName() + ".provider";
-        Uri uri = FileProvider.getUriForFile(context, authority, file);
+        try {
+            String authority = context.getApplicationContext().getPackageName() + ".provider";
+            Uri uri = FileProvider.getUriForFile(context, authority, file);
 
-        Intent intent = new Intent();
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(uri, type);
-        context.startActivity(intent);
+            Intent intent = new Intent();
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, type);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            logE("Can not open file", e);
+        }
     }
 
     public static void playInVlc(Context context) {
-        File outputFile = Configuration.getRadioOutputFile();
-        String authority = context.getApplicationContext().getPackageName() + ".provider";
-        Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
+        try {
+            File outputFile = Configuration.getRadioOutputFile();
+            String authority = context.getApplicationContext().getPackageName() + ".provider";
+            Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
 
-        Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
-        vlcIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        vlcIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
+            vlcIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            vlcIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        vlcIntent.setPackage("org.videolan.vlc");
-        vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
-        vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
-        vlcIntent.putExtra("title", "Radio Download");
-        vlcIntent.putExtra("from_start", false);
-        vlcIntent.putExtra("position", 0L);
-        context.startActivity(vlcIntent);
+            vlcIntent.setPackage("org.videolan.vlc");
+            vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
+            vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
+            vlcIntent.putExtra("title", "Radio Download");
+            vlcIntent.putExtra("from_start", false);
+            vlcIntent.putExtra("position", 0L);
+            context.startActivity(vlcIntent);
+        } catch (Exception e) {
+            logE("Can not play in vlc", e);
+        }
     }
 
 }

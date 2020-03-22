@@ -77,11 +77,6 @@ public class MainActivity extends AppCompatActivity {
             logI("Cancel download.");
         }
 
-        if(id == R.id.open_download_dir) {
-            Util.openDownloadDir(this);
-            logI("Cancel download.");
-        }
-
         if(id == R.id.open_vlc) {
             Util.playInVlc(this);
             logI("Cancel download.");

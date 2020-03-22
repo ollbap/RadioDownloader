@@ -12,6 +12,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Locale;
 
 import static es.ollbap.radiodownloader.Util.logE;
@@ -52,6 +55,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
     @Override
     protected String doInBackground(String... notUsed) {
+        Instant startInstant = getCurrentInstant();
 
         File outputFile = Configuration.getRadioOutputFile();
 
@@ -66,7 +70,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         try (OutputStream output = new FileOutputStream(outputFile, append)) {
             while (retryCount <= MAX_RETRY) {
                 long retryStart = System.nanoTime();
-                DownloadStatus result = downloadStream(url, output);
+                DownloadStatus result = downloadStream(startInstant, url, output);
                 switch (result) {
                     case CAN_NOT_CONNECT:
                     case CONNECTION_LOST:
@@ -107,6 +111,10 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         return null;
     }
 
+    private Instant getCurrentInstant() {
+        return Clock.systemUTC().instant();
+    }
+
     enum DownloadStatus {
         ERROR,
         COMPLETE,
@@ -115,7 +123,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         CONNECTION_IS_NOT_WIFI
     }
 
-    private DownloadStatus downloadStream(String url, OutputStream output) {
+    private DownloadStatus downloadStream(Instant startInstant, String url, OutputStream output) {
         HttpURLConnection connection = null;
         InputStream input = null;
 
@@ -134,14 +142,16 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             // download the file
             input = connection.getInputStream();
 
-            long start = System.currentTimeMillis();
             byte data[] = new byte[4096];
             long lastLog = 0;
             long lastNotification = 0;
             int count;
             while ((count = input.read(data)) != -1) {
-                if ((System.currentTimeMillis()-start) > 1000*Configuration.DOWNLOAD_DURATION_SECONDS) {
-                    logI("Task Completed faster duration "+Configuration.DOWNLOAD_DURATION_SECONDS+" seconds");
+                Instant now = getCurrentInstant();
+                Duration elapsedTime = Duration.between(startInstant, now);
+
+                if (elapsedTime.getSeconds() > Configuration.DOWNLOAD_DURATION_SECONDS) {
+                    logI("Task Completed faster duration " + Configuration.DOWNLOAD_DURATION_SECONDS + " seconds");
                     return DownloadStatus.COMPLETE;
                 }
 

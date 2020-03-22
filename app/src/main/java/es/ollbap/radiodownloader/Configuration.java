@@ -20,7 +20,7 @@ import java.util.Locale;
  */
 class Configuration {
     //Download Task configurations
-    public static final int DOWNLOAD_DURATION_SECONDS = 4 * (60 * 60); // 3h
+    public static final int DOWNLOAD_DURATION_SECONDS = 5 * (60 * 60); // 5h
     public static final int LOG_UPDATE_SIZE_BYTES = 10 * (1024 * 1024);   // 10MB
     public static final int NOTIFICATION_UPDATE_SIZE_BYTES = 50 * (1024); // 50Kb
 
@@ -69,8 +69,7 @@ class Configuration {
 
     @NonNull
     public static File getOutputDirectory() {
-        File outputDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_MUSIC), "radioDownloader");
+        File outputDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "radioDownloader");
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();

@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -298,15 +299,26 @@ public final class Util {
         return resolvePlsInternal(url);
     }
 
+    public static void openLogFile(Context context) {
+        openFile(context, Configuration.getRadioLogOutputFile(), "text/plain");
+    }
+
     public static void openRadioFile(Context context) {
-        File outputFile = Configuration.getRadioOutputFile();
+        openFile(context, Configuration.getRadioOutputFile(), "audio/*");
+    }
+
+    public static void openDownloadDir(Context context) {
+        openFile(context, Configuration.getOutputDirectory(), DocumentsContract.Document.MIME_TYPE_DIR);
+    }
+
+    public static void openFile(Context context, File file, String type) {
         String authority = context.getApplicationContext().getPackageName() + ".provider";
-        Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
+        Uri uri = FileProvider.getUriForFile(context, authority, file);
 
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(uri, "audio/*");
+        intent.setDataAndType(uri, type);
         context.startActivity(intent);
     }
 

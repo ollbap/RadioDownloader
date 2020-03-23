@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 
+import static es.ollbap.radiodownloader.Util.isActiveNetworkMetered;
 import static es.ollbap.radiodownloader.Util.logE;
 import static es.ollbap.radiodownloader.Util.logI;
 
@@ -135,7 +136,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             }
 
             //Check again metered just in case wifi was disconnected right after check but before connection is performed.
-            if (!allowMetered && isActiveNetworkMetered()) {
+            if (!allowMetered && isActiveNetworkMetered(context)) {
                 logE("Download not performed because network is metered");
                 return DownloadStatus.CONNECTION_IS_NOT_WIFI;
             }
@@ -265,21 +266,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             logI("Resolved URL " + url);
         }
         return url;
-    }
-
-    private boolean isActiveNetworkMetered() {
-        ConnectivityManager mConnectivity =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        // Skip if no connection
-        assert mConnectivity != null;
-
-        if (mConnectivity.isActiveNetworkMetered()) {
-            logE("Current network is metered");
-            return true;
-        }
-
-        logI("Current network is not metered");
-        return false;
     }
 
     public String getDownloadedSizeTag() {

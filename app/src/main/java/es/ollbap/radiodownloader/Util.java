@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
@@ -346,6 +347,21 @@ public final class Util {
         } catch (Exception e) {
             logE("Can not play in vlc", e);
         }
+    }
+
+    public static boolean isActiveNetworkMetered(Context context) {
+        ConnectivityManager mConnectivity =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Skip if no connection
+        assert mConnectivity != null;
+
+        if (mConnectivity.isActiveNetworkMetered()) {
+            logE("Current network is metered");
+            return true;
+        }
+
+        logI("Current network is not metered");
+        return false;
     }
 
 }

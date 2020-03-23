@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static es.ollbap.radiodownloader.Util.isActiveNetworkMetered;
 import static es.ollbap.radiodownloader.Util.logI;
 import static es.ollbap.radiodownloader.Util.programNextAlarm;
 import static es.ollbap.radiodownloader.Util.programTestAlarm;
@@ -152,16 +153,23 @@ public class MainActivity extends AppCompatActivity {
         sb.append(String.format("%02d:%02d", Configuration.ALARM_WEEKEND_HOUR, Configuration.ALARM_WEEKEND_MINUTE));
         sb.append("\n");
 
+        sb.append("\n");
+        sb.append(Util.getDownloadTaskProgress());
+
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         assert pm != null;
         boolean ignoringBatteryOptimization = pm.isIgnoringBatteryOptimizations(getPackageName());
+
+        sb.append("\n\n\n\n");
 
         if (!ignoringBatteryOptimization) {
             sb.append("\nNot ignoring battery optimization!!!!!!\n");
         }
 
+        sb.append("Network is metered: " + isActiveNetworkMetered(this));
         sb.append("\n");
-        sb.append(Util.getDownloadTaskProgress());
+
+
 
         toolbar.setText(sb.toString());
     }

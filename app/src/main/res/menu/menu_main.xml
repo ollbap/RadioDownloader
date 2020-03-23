@@ -8,15 +8,6 @@
     <item android:id="@+id/toggle_metered"
         app:showAsAction="ifRoom|withText"
         android:title="Toggle metered restriction" />
-    <item android:id="@+id/program_alarms"
-        app:showAsAction="ifRoom|withText"
-        android:title="Program next alarm" />
-    <item android:id="@+id/program_test_alarm"
-        app:showAsAction="ifRoom|withText"
-        android:title="Program alarm test (10s)" />
-    <item android:id="@+id/program_test_1h_alarm"
-        app:showAsAction="ifRoom|withText"
-        android:title="Program alarm test (1h)" />
     <item android:id="@+id/cancel_download"
         app:showAsAction="ifRoom|withText"
         android:title="Cancel download" />

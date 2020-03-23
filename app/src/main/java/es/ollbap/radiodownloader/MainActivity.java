@@ -9,22 +9,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.os.PowerManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import static es.ollbap.radiodownloader.Util.isActiveNetworkMetered;
 import static es.ollbap.radiodownloader.Util.logI;
-import static es.ollbap.radiodownloader.Util.programNextAlarm;
-import static es.ollbap.radiodownloader.Util.programTestAlarm;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -85,25 +77,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (id == R.id.program_alarms || item.getItemId() == R.id.program_test_alarm || item.getItemId() == R.id.program_test_1h_alarm) {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
-            Calendar nextAlarmTime = null;
-            if(id == R.id.program_alarms) {
-                nextAlarmTime = programNextAlarm(this);
-            }
-
-            if(id == R.id.program_test_alarm) {
-                nextAlarmTime = programTestAlarm(this, 1000*10);
-            }
-
-            if(id == R.id.program_test_1h_alarm) {
-                nextAlarmTime = programTestAlarm(this, 1000*30*60);
-            }
-            if (nextAlarmTime != null) {
-                logI("Alarm programmed at: "+format.format(nextAlarmTime.getTime()));
-            }
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -142,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshContent() {
         TextView toolbar = findViewById(R.id.textview_first);
+        if (toolbar == null) {
+            return;
+        }
 
         StringBuilder sb = new StringBuilder();
 
@@ -166,10 +142,8 @@ public class MainActivity extends AppCompatActivity {
             sb.append("\nNot ignoring battery optimization!!!!!!\n");
         }
 
-        sb.append("Network is metered: " + isActiveNetworkMetered(this));
+        sb.append("Network is metered: ").append(isActiveNetworkMetered(this));
         sb.append("\n");
-
-
 
         toolbar.setText(sb.toString());
     }

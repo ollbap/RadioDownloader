@@ -82,6 +82,14 @@ public class MainActivity extends AppCompatActivity {
             logI("Cancel download.");
         }
 
+        if(id == R.id.toggle_metered) {
+            DownloadTask lastInstance = DownloadTask.getLastInstance();
+            if (lastInstance != null) {
+                lastInstance.toggleMetered();
+                logI("toggled metered restrictions");
+            }
+        }
+
         if (id == R.id.program_alarms || item.getItemId() == R.id.program_test_alarm || item.getItemId() == R.id.program_test_1h_alarm) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
             Calendar nextAlarmTime = null;

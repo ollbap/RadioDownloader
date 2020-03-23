@@ -29,6 +29,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private int retryCount = 0;
     private static final int MAX_RETRY = 30;
     private static final int WAIT_FOR_RETRY_SECONDS = 5;
+    private boolean allowMetered = false;
 
     public DownloadTask(Context context, boolean append) {
         this.append = append;
@@ -71,6 +72,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             while (retryCount <= MAX_RETRY) {
                 long retryStart = System.nanoTime();
                 DownloadStatus result = downloadStream(startInstant, url, output);
+                Util.updateForegroundServiceNotification(context);
                 switch (result) {
                     case CAN_NOT_CONNECT:
                     case CONNECTION_LOST:
@@ -97,7 +99,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                         logI("Not wifi 3 times, exiting");
                         return null;
                     }
-
                 } else {
                     notWifiInARow = 0;
                 }
@@ -134,7 +135,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             }
 
             //Check again metered just in case wifi was disconnected right after check but before connection is performed.
-            if (isActiveNetworkMetered()) {
+            if (!allowMetered && isActiveNetworkMetered()) {
                 logE("Download not performed because network is metered");
                 return DownloadStatus.CONNECTION_IS_NOT_WIFI;
             }
@@ -290,5 +291,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             extra += " retry: "+retryCount;
         }
         return String.format(Locale.ENGLISH, "%.2fMb"+extra, total / (1024.0*1024.0));
+    }
+
+    public void toggleMetered() {
+        allowMetered = !allowMetered;
+    }
+
+    public boolean isAllowMetered() {
+        return allowMetered;
     }
 }

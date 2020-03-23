@@ -170,7 +170,11 @@ public final class Util {
         DownloadTask instance = DownloadTask.getLastInstance();
         if (instance != null) {
             updateText = "Download status "+instance.getStatus()+" "+instance.getDownloadedSizeTag();
+            if (instance.isAllowMetered()) {
+                updateText += " (metered allowed)";
+            }
         }
+
         return updateText;
     }
 

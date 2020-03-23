@@ -171,7 +171,7 @@ public final class Util {
         if (instance != null) {
             updateText = "Download status "+instance.getStatus()+" "+instance.getDownloadedSizeTag();
             if (instance.isAllowMetered()) {
-                updateText += " (metered allowed)";
+                updateText += "\n(metered allowed)";
             }
         }
 

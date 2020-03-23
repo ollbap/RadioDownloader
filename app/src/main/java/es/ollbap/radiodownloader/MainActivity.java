@@ -1,6 +1,7 @@
 package es.ollbap.radiodownloader;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -12,19 +13,25 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.PowerManager;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static es.ollbap.radiodownloader.Util.logI;
 import static es.ollbap.radiodownloader.Util.programNextAlarm;
 import static es.ollbap.radiodownloader.Util.programTestAlarm;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Timer autoUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,5 +133,49 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         requestPermissions();
+        autoUpdate = new Timer();
+        autoUpdate.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        refreshContent();
+                    }
+                });
+            }
+        }, 0, 1000); //
+    }
+
+    @Override
+    protected void onPause() {
+        autoUpdate.cancel();
+        super.onPause();
+    }
+
+    private void refreshContent() {
+        TextView toolbar = findViewById(R.id.textview_first);
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("[L-V]   ");
+        sb.append(String.format("%02d:%02d", Configuration.ALARM_WEEKDAY_HOUR, Configuration.ALARM_WEEKDAY_MINUTE));
+        sb.append("\n");
+
+        sb.append("[S-D]   ");
+        sb.append(String.format("%02d:%02d", Configuration.ALARM_WEEKEND_HOUR, Configuration.ALARM_WEEKEND_MINUTE));
+        sb.append("\n");
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        assert pm != null;
+        boolean ignoringBatteryOptimization = pm.isIgnoringBatteryOptimizations(getPackageName());
+
+        if (!ignoringBatteryOptimization) {
+            sb.append("\nNot ignoring battery optimization!!!!!!\n");
+        }
+
+        sb.append("\n");
+        sb.append(Util.getDownloadTaskProgress());
+
+        toolbar.setText(sb.toString());
     }
 }

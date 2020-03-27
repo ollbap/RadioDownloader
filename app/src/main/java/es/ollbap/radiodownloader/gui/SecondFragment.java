@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.gui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import static es.ollbap.radiodownloader.Util.programTestAlarm;
+import es.ollbap.radiodownloader.R;
+
+import static es.ollbap.radiodownloader.util.Util.programTestAlarm;
 
 public class SecondFragment extends Fragment {
 

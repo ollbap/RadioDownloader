@@ -1,10 +1,12 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.service;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import static es.ollbap.radiodownloader.Util.logI;
+import es.ollbap.radiodownloader.util.Util;
+
+import static es.ollbap.radiodownloader.util.Util.logI;
 
 /**
  * Created by ollbap on 1/13/18.

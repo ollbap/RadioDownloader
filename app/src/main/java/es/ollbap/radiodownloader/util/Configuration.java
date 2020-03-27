@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.util;
 
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
@@ -18,20 +18,13 @@ import java.util.Locale;
 /**
  * Created by ollbap on 1/20/18.
  */
-class Configuration {
+public class Configuration {
     //Download Task configurations
     public static final int LOG_UPDATE_SIZE_BYTES = 10 * (1024 * 1024);   // 10MB
 
     public static final String DOWNLOAD_FILE_NAME = "radio.mp3";
     public static final String DOWNLOAD_URL_OLD = "http://19093.live.streamtheworld.com:80/CADENASER_SC";
     public static final String DOWNLOAD_URL_NEW = "https://playerservices.streamtheworld.com/pls/CADENASER.pls";
-
-    //Alarms configuration
-    public static final int ALARM_WEEKEND_HOUR = 8;
-    public static final int ALARM_WEEKEND_MINUTE = 0;
-
-    public static final int ALARM_WEEKDAY_HOUR = 6;
-    public static final int ALARM_WEEKDAY_MINUTE = 0;
 
     private static final String FOREGROUND_NOTIFICATION_CHANEL_ID = "FOREGROUND_NOTIFICATION_CHANEL";
 

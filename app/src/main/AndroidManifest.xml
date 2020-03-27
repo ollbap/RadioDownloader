@@ -28,7 +28,7 @@
         </provider>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".gui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -39,23 +39,23 @@
         </activity>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".gui.SettingsActivity"
             android:label="Settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".gui.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".gui.MainActivity"/>
         </activity>
 
-        <service android:name="es.ollbap.radiodownloader.ForegroundService" />
+        <service android:name="es.ollbap.radiodownloader.service.ForegroundService" />
 
-        <receiver android:name="es.ollbap.radiodownloader.MyAlarmReceiver">
+        <receiver android:name="es.ollbap.radiodownloader.service.MyAlarmReceiver">
             <intent-filter>
                 <action android:name="com.example.android.repeatingalarm" />
             </intent-filter>
         </receiver>
-        <receiver android:name="es.ollbap.radiodownloader.ServiceStarter">
+        <receiver android:name="es.ollbap.radiodownloader.service.ServiceStarter">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>

@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.gui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import es.ollbap.radiodownloader.R;
 
 public class FirstFragment extends Fragment {
 

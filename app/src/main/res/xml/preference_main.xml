@@ -6,7 +6,7 @@
     <PreferenceCategory android:title="Download">
         <SwitchPreferenceCompat
             android:key="download_enabled"
-            android:title="Enabled"
+            android:title="Enable download"
             android:defaultValue="true"
             />
         <EditTextPreference
@@ -19,6 +19,25 @@
             android:max="24"
             app:showSeekBarValue="true"
             android:defaultValue="5" />
+        <CheckBoxPreference
+            android:key="download_allow_metered"
+            android:title="Allow usage of metered networks"
+            android:defaultValue="false"
+            />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Times">
+        <EditTextPreference
+            android:key="weekday_start_time"
+            android:title="Weekday start time"
+            android:defaultValue="06:00"
+            android:inputType="time"
+            />
+        <EditTextPreference
+            android:key="weekend_start_time"
+            android:title="Weekend start time"
+            android:defaultValue="08:00"
+            android:inputType="time"
+            />
     </PreferenceCategory>
     <PreferenceCategory android:title="Debugging">
         <SeekBarPreference

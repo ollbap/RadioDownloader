@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.gui;
 
 import android.Manifest;
 import android.content.Context;
@@ -16,8 +16,14 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
-import static es.ollbap.radiodownloader.Util.isActiveNetworkMetered;
-import static es.ollbap.radiodownloader.Util.logI;
+
+import es.ollbap.radiodownloader.service.DownloadTask;
+import es.ollbap.radiodownloader.R;
+import es.ollbap.radiodownloader.util.Time;
+import es.ollbap.radiodownloader.util.Util;
+
+import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
+import static es.ollbap.radiodownloader.util.Util.logI;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -128,12 +134,26 @@ public class MainActivity extends AppCompatActivity {
 
         StringBuilder sb = new StringBuilder();
 
+        String weekdayTime;
+        try {
+            weekdayTime = Util.getStartTime(this, false).toString();
+        } catch (Time.IncorrectTimeFormatException e) {
+            weekdayTime = "Format error";
+        }
+
+        String weekendTime;
+        try {
+            weekendTime = Util.getStartTime(this, true).toString();
+        } catch (Time.IncorrectTimeFormatException e) {
+            weekendTime = "Format error";
+        }
+
         sb.append("[L-V]   ");
-        sb.append(String.format("%02d:%02d", Configuration.ALARM_WEEKDAY_HOUR, Configuration.ALARM_WEEKDAY_MINUTE));
+        sb.append(weekdayTime);
         sb.append("\n");
 
         sb.append("[S-D]   ");
-        sb.append(String.format("%02d:%02d", Configuration.ALARM_WEEKEND_HOUR, Configuration.ALARM_WEEKEND_MINUTE));
+        sb.append(weekendTime);
         sb.append("\n");
 
         sb.append("\n");

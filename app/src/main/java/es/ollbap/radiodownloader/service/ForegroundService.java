@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.service;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,7 +15,12 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import static es.ollbap.radiodownloader.Util.*;
+import es.ollbap.radiodownloader.R;
+import es.ollbap.radiodownloader.gui.MainActivity;
+import es.ollbap.radiodownloader.util.Configuration;
+import es.ollbap.radiodownloader.util.Util;
+
+import static es.ollbap.radiodownloader.util.Util.*;
 
 /**
  * Created by ollbap on 1/19/18.

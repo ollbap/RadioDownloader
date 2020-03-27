@@ -1,17 +1,18 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.util;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +28,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import es.ollbap.radiodownloader.service.DownloadTask;
+import es.ollbap.radiodownloader.service.ForegroundService;
+import es.ollbap.radiodownloader.service.MyAlarmReceiver;
 
 /**
  * Created by ollbap on 1/13/18.
@@ -82,7 +87,7 @@ public final class Util {
     }
 
     public static Calendar programNextAlarm(Context context) {
-        Calendar nextAlarmTime = computeNextAlarmTime();
+        Calendar nextAlarmTime = computeNextAlarmTime(context);
         programAlarm(context, nextAlarmTime.getTimeInMillis());
         return nextAlarmTime;
     }
@@ -99,34 +104,52 @@ public final class Util {
         return calendar;
     }
 
-    public static Calendar computeNextAlarmTime() {
+    public static Calendar computeNextAlarmTime(Context context) {
         Calendar now = Calendar.getInstance();
         Calendar calendar = (Calendar) now.clone();
 
-        setStartForDay(calendar);
+        setStartForDay(calendar, context);
 
         //If alarm already lost then go to tomorrow.
         if (calendar.before(now)) {
             calendar = (Calendar) now.clone();
             calendar.add(Calendar.HOUR, 24);
-            setStartForDay(calendar);
+            setStartForDay(calendar, context);
         }
 
         return calendar;
     }
 
-    public static void setStartForDay(Calendar calendar) {
+    public static void setStartForDay(Calendar calendar, Context context) {
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
-        if (isWeekend(dayOfWeek)) {
-            calendar.set(Calendar.HOUR_OF_DAY, Configuration.ALARM_WEEKEND_HOUR);
-            calendar.set(Calendar.MINUTE, Configuration.ALARM_WEEKEND_MINUTE);
-        } else {
-            calendar.set(Calendar.HOUR_OF_DAY, Configuration.ALARM_WEEKDAY_HOUR);
-            calendar.set(Calendar.MINUTE, Configuration.ALARM_WEEKDAY_MINUTE);
+        Time time;
+        try {
+            time = getStartTime(context, isWeekend(dayOfWeek));
+        } catch (Time.IncorrectTimeFormatException e) {
+            Util.logE("Time format is incorrect: " + e.getMessage()+". Defaulting to 06:00.");
+            try {
+                time = new Time(6,0);
+            } catch (Time.IncorrectTimeFormatException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
+
+        calendar.set(Calendar.HOUR_OF_DAY, time.getHour());
+        calendar.set(Calendar.MINUTE, time.getMinute());
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+    }
+
+    public static Time getStartTime(Context context, boolean isWeekend) throws Time.IncorrectTimeFormatException {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String value;
+        if (isWeekend) {
+            value = sharedPreferences.getString("weekend_start_time", "08:00");
+        } else {
+            value = sharedPreferences.getString("weekday_start_time", "06:00");
+        }
+        return new Time(value);
     }
 
     public static void startForegroundService(Context context) {

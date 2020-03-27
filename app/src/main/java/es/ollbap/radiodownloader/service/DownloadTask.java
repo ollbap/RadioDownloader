@@ -1,8 +1,7 @@
-package es.ollbap.radiodownloader;
+package es.ollbap.radiodownloader.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 
 import androidx.preference.PreferenceManager;
@@ -20,9 +19,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 
-import static es.ollbap.radiodownloader.Util.isActiveNetworkMetered;
-import static es.ollbap.radiodownloader.Util.logE;
-import static es.ollbap.radiodownloader.Util.logI;
+import es.ollbap.radiodownloader.util.Util;
+import es.ollbap.radiodownloader.util.Configuration;
+
+import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
+import static es.ollbap.radiodownloader.util.Util.logE;
+import static es.ollbap.radiodownloader.util.Util.logI;
 
 public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
@@ -33,7 +35,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private boolean append;
     private int retryCount = 0;
     private static final int WAIT_FOR_RETRY_SECONDS = 5;
-    private boolean allowMetered = false;
 
     private int downloadSeconds = 0;
     private boolean downloadEnabled;
@@ -41,6 +42,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private int downloadNotificationRefreshInBytes;
     private int allowedErrorRetries;
     private int allowedNotWifiInaRowErrors;
+    private boolean allowMetered;
 
     public DownloadTask(Context context, boolean append) {
         this.append = append;
@@ -67,6 +69,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         refreshConfigurationForNotificationRefresh(sharedPreferences);
         allowedErrorRetries = sharedPreferences.getInt("allowed_errors_retry_count", 50);
         allowedNotWifiInaRowErrors = sharedPreferences.getInt("allowed_not_wifi_in_a_row_errors", 50);
+        allowMetered = sharedPreferences.getBoolean("download_allow_metered", false);
     }
 
     private void refreshConfigurationForNotificationRefresh(SharedPreferences sharedPreferences) {

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Download">
+        <SwitchPreferenceCompat
+            android:key="download_enabled"
+            android:title="Enabled"
+            android:defaultValue="true"
+            />
+        <EditTextPreference
+            android:key="download_url"
+            android:title="Download URL"
+            android:defaultValue="https://playerservices.streamtheworld.com/pls/CADENASER.pls"/>
+        <SeekBarPreference
+            android:key="download_hours"
+            android:title="Hours to download"
+            android:max="24"
+            app:showSeekBarValue="true"
+            android:defaultValue="5" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Debugging">
+        <SeekBarPreference
+            android:key="refresh_notification_kb"
+            android:title="Refresh notification each Kb block sized"
+            android:max="512"
+            android:min="2"
+            app:showSeekBarValue="true"
+            android:defaultValue="50" />
+        <SeekBarPreference
+            android:key="allowed_not_wifi_in_a_row_errors"
+            android:title="Allowed not wifi un a row errors"
+            android:max="250"
+            app:showSeekBarValue="true"
+            android:defaultValue="50" />
+        <SeekBarPreference
+            android:key="allowed_errors_retry_count"
+            android:title="Allowed errors"
+            android:max="250"
+            app:showSeekBarValue="true"
+            android:defaultValue="50" />
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

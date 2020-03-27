@@ -2,6 +2,7 @@ package es.ollbap.radiodownloader;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -75,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
                 lastInstance.toggleMetered();
                 logI("toggled metered restrictions");
             }
+        }
+
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

@@ -1,8 +1,11 @@
 package es.ollbap.radiodownloader;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+
+import androidx.preference.PreferenceManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,13 +27,20 @@ import static es.ollbap.radiodownloader.Util.logI;
 public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
     private static DownloadTask lastInstance = null;
+
     private Context context;
     private int total = 0;
     private boolean append;
     private int retryCount = 0;
-    private static final int MAX_RETRY = 30;
     private static final int WAIT_FOR_RETRY_SECONDS = 5;
     private boolean allowMetered = false;
+
+    private int downloadSeconds = 0;
+    private boolean downloadEnabled;
+    private String downloadUrl;
+    private int downloadNotificationRefreshInBytes;
+    private int allowedErrorRetries;
+    private int allowedNotWifiInaRowErrors;
 
     public DownloadTask(Context context, boolean append) {
         this.append = append;
@@ -49,6 +59,18 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             }
             lastInstance = this;
         }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        downloadEnabled = sharedPreferences.getBoolean("download_enabled", false);
+        downloadUrl = sharedPreferences.getString("download_url", "");
+        downloadSeconds = sharedPreferences.getInt("download_hours", 4) * 60 * 60;
+        refreshConfigurationForNotificationRefresh(sharedPreferences);
+        allowedErrorRetries = sharedPreferences.getInt("allowed_errors_retry_count", 50);
+        allowedNotWifiInaRowErrors = sharedPreferences.getInt("allowed_not_wifi_in_a_row_errors", 50);
+    }
+
+    private void refreshConfigurationForNotificationRefresh(SharedPreferences sharedPreferences) {
+        downloadNotificationRefreshInBytes = sharedPreferences.getInt("refresh_notification_kb", 50) *1025;
     }
 
     public static DownloadTask getLastInstance() {
@@ -58,21 +80,24 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     @Override
     protected String doInBackground(String... notUsed) {
         Instant startInstant = getCurrentInstant();
+        if (!downloadEnabled) {
+            logI("Download skipped because configuration disabled it");
+            return null;
+        }
 
         File outputFile = Configuration.getRadioOutputFile();
-
-        String url = resolveURL(Configuration.DOWNLOAD_URL);
-        if (url == null) {
+        downloadUrl = resolveURL(downloadUrl);
+        if (downloadUrl == null) {
             logE("URL can not be resolved, exiting");
             return null;
         }
-        logI("Downloading URL " + url);
+        logI("Downloading URL " + downloadUrl);
         int notWifiInARow = 0;
 
         try (OutputStream output = new FileOutputStream(outputFile, append)) {
-            while (retryCount <= MAX_RETRY) {
+            while (retryCount <= allowedErrorRetries) {
                 long retryStart = System.nanoTime();
-                DownloadStatus result = downloadStream(startInstant, url, output);
+                DownloadStatus result = downloadStream(startInstant, downloadUrl, output);
                 Util.updateForegroundServiceNotification(context);
                 switch (result) {
                     case CAN_NOT_CONNECT:
@@ -82,7 +107,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                         // seems like not wifi and then becomes wifi.
                     case CONNECTION_IS_NOT_WIFI:
                         retryCount++;
-                        logI("Download retry "+retryCount+"/"+MAX_RETRY);
+                        logI("Download retry "+retryCount+"/"+allowedErrorRetries);
                         //If just tried wait for a second.
                         if ((System.nanoTime() - retryStart) < WAIT_FOR_RETRY_SECONDS * 1000000000L) {
                             waitTime(WAIT_FOR_RETRY_SECONDS * 1000);
@@ -96,8 +121,8 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
                 if (result == DownloadStatus.CONNECTION_IS_NOT_WIFI) {
                     notWifiInARow++;
-                    if (notWifiInARow >= 3) {
-                        logI("Not wifi 3 times, exiting");
+                    if (notWifiInARow >= allowedNotWifiInaRowErrors) {
+                        logI("Not wifi " + allowedNotWifiInaRowErrors + " times in a row, exiting");
                         return null;
                     }
                 } else {
@@ -152,8 +177,8 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 Instant now = getCurrentInstant();
                 Duration elapsedTime = Duration.between(startInstant, now);
 
-                if (elapsedTime.getSeconds() > Configuration.DOWNLOAD_DURATION_SECONDS) {
-                    logI("Task Completed faster duration " + Configuration.DOWNLOAD_DURATION_SECONDS + " seconds");
+                if (elapsedTime.getSeconds() > downloadSeconds) {
+                    logI("Task Completed faster duration " + downloadSeconds + " seconds");
                     return DownloadStatus.COMPLETE;
                 }
 
@@ -169,8 +194,10 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                     lastLog = total;
                 }
 
-                if ((total - lastNotification) > Configuration.NOTIFICATION_UPDATE_SIZE_BYTES) {
+                if ((total - lastNotification) > downloadNotificationRefreshInBytes) {
                     Util.updateForegroundServiceNotification(context);
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    refreshConfigurationForNotificationRefresh(sharedPreferences);
                     lastNotification = total;
                 }
 

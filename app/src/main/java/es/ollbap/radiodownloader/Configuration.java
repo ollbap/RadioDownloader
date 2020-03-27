@@ -20,13 +20,11 @@ import java.util.Locale;
  */
 class Configuration {
     //Download Task configurations
-    public static final int DOWNLOAD_DURATION_SECONDS = 5 * (60 * 60); // 5h
     public static final int LOG_UPDATE_SIZE_BYTES = 10 * (1024 * 1024);   // 10MB
-    public static final int NOTIFICATION_UPDATE_SIZE_BYTES = 50 * (1024); // 50Kb
 
     public static final String DOWNLOAD_FILE_NAME = "radio.mp3";
     public static final String DOWNLOAD_URL_OLD = "http://19093.live.streamtheworld.com:80/CADENASER_SC";
-    public static final String DOWNLOAD_URL = "https://playerservices.streamtheworld.com/pls/CADENASER.pls";
+    public static final String DOWNLOAD_URL_NEW = "https://playerservices.streamtheworld.com/pls/CADENASER.pls";
 
     //Alarms configuration
     public static final int ALARM_WEEKEND_HOUR = 8;

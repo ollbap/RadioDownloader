@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import es.ollbap.radiodownloader.R;
+import es.ollbap.radiodownloader.util.Util;
 
 import static es.ollbap.radiodownloader.util.Util.programTestAlarm;
 
@@ -39,6 +40,13 @@ public class SecondFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 programTestAlarm(view.getContext(), 1000*10);
+            }
+        });
+
+        view.findViewById(R.id.button_test_configure_next_alarm).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Util.programNextAlarm(view.getContext());
             }
         });
 

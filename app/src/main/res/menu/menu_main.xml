@@ -2,27 +2,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="es.ollbap.radiodownloader.LegacyMainActivity">
+
     <item android:id="@+id/start_download"
         app:showAsAction="ifRoom|withText"
         android:title="Start download" />
-    <item android:id="@+id/toggle_metered"
-        app:showAsAction="ifRoom|withText"
-        android:title="Toggle metered restriction" />
-    <item android:id="@+id/cancel_download"
-        app:showAsAction="ifRoom|withText"
-        android:title="Cancel download" />
-    <item android:id="@+id/open_radio_file"
-        app:showAsAction="ifRoom|withText"
-        android:title="Open Radio File" />
-    <item android:id="@+id/open_log_file"
-        app:showAsAction="ifRoom|withText"
-        android:title="Open Log File" />
-    <item android:id="@+id/open_vlc"
-        app:showAsAction="ifRoom|withText"
-        android:title="Play with VLC" />
-    <item
-        android:id="@+id/action_settings"
-        android:title="Settings"
-        app:showAsAction="never"
-        />
+
+    <group android:id="@+id/group_feature1">
+        <item android:id="@+id/cancel_download"
+            app:showAsAction="ifRoom|withText"
+            android:title="Cancel download" />
+        <item android:id="@+id/toggle_metered"
+            app:showAsAction="ifRoom|withText"
+            android:title="Toggle metered restriction" />
+    </group>
+
+    <group android:id="@+id/group_feature2">
+        <item android:id="@+id/open_radio_file"
+            app:showAsAction="ifRoom|withText"
+            android:title="Open Radio File" />
+        <item android:id="@+id/open_log_file"
+            app:showAsAction="ifRoom|withText"
+            android:title="Open Log File" />
+        <item android:id="@+id/open_vlc"
+            app:showAsAction="ifRoom|withText"
+            android:title="Play with VLC" />
+    </group>
+
+    <group android:id="@+id/group_feature3">
+        <item
+            android:id="@+id/action_settings"
+            android:title="Settings"
+            app:showAsAction="never"
+            />
+    </group>
 </menu>

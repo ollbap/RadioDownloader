@@ -161,7 +161,9 @@ public final class Util {
         //If alarm already lost then go to tomorrow.
         if (calendar.before(now)) {
             calendar = (Calendar) now.clone();
-            calendar.add(Calendar.HOUR, 24);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
             setStartForDay(calendar, context);
         }
 

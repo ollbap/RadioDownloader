@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.SocketException;
 import java.net.URL;
 import java.time.Clock;
 import java.time.Duration;
@@ -26,7 +25,6 @@ import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
 import static es.ollbap.radiodownloader.util.Util.logD;
 import static es.ollbap.radiodownloader.util.Util.logE;
 import static es.ollbap.radiodownloader.util.Util.logI;
-import static es.ollbap.radiodownloader.util.Util.logW;
 
 public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
@@ -38,13 +36,22 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private int retryCount = 0;
     private static final int WAIT_FOR_RETRY_SECONDS = 5;
 
-    private int downloadSeconds = 0;
+    private int downloadSeconds;
     private boolean downloadEnabled;
     private String downloadUrl;
     private int downloadNotificationRefreshInBytes;
+    private int downloadLogRefreshInBytes;
     private int allowedErrorRetries;
     private int allowedNotWifiInaRowErrors;
     private boolean allowMetered;
+    private DownloadStatus downloadStatus = DownloadStatus.NOT_STARTED;
+
+    public enum DownloadStatus {
+        NOT_STARTED,
+        INTERRUPTED,
+        DOWNLOADING,
+        COMPLETED
+    }
 
     public DownloadTask(Context context, boolean append) {
         this.append = append;
@@ -74,8 +81,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         allowMetered = sharedPreferences.getBoolean("download_allow_metered", false);
     }
 
+    public DownloadStatus getDownloadStatus() {
+        return downloadStatus;
+    }
+
     private void refreshConfigurationForNotificationRefresh(SharedPreferences sharedPreferences) {
-        downloadNotificationRefreshInBytes = sharedPreferences.getInt("refresh_notification_kb", 50) *1025;
+        downloadNotificationRefreshInBytes = sharedPreferences.getInt("refresh_download_notification_kb", 50) * 1024;
+        downloadLogRefreshInBytes = sharedPreferences.getInt("refresh_download_log_mb", 10) * 1024 * 1024;
     }
 
     public static DownloadTask getLastInstance() {
@@ -96,13 +108,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             logE("URL can not be resolved, exiting");
             return null;
         }
-        logI("Downloading URL " + downloadUrl);
+        logD("Downloading URL " + downloadUrl);
         int notWifiInARow = 0;
 
         try (OutputStream output = new FileOutputStream(outputFile, append)) {
             while (retryCount <= allowedErrorRetries) {
                 long retryStart = System.nanoTime();
-                DownloadStatus result = downloadStream(startInstant, downloadUrl, output);
+                DownloadIterationResult result = downloadStream(startInstant, downloadUrl, output);
                 Util.updateForegroundServiceNotification(context);
                 switch (result) {
                     case CAN_NOT_CONNECT:
@@ -112,7 +124,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                         // seems like not wifi and then becomes wifi.
                     case CONNECTION_IS_NOT_WIFI:
                         retryCount++;
-                        logW("Download retry " + retryCount + "/" + allowedErrorRetries);
+                        logD("Download retry " + retryCount + "/" + allowedErrorRetries);
                         //If just tried wait for a second.
                         if ((System.nanoTime() - retryStart) < WAIT_FOR_RETRY_SECONDS * 1000000000L) {
                             waitTime(WAIT_FOR_RETRY_SECONDS * 1000);
@@ -120,10 +132,11 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
                         break;
                     case COMPLETE:
+                        downloadStatus = DownloadStatus.COMPLETED;
                         return null;
                 }
 
-                if (result == DownloadStatus.CONNECTION_IS_NOT_WIFI) {
+                if (result == DownloadIterationResult.CONNECTION_IS_NOT_WIFI) {
                     notWifiInARow++;
                     if (notWifiInARow >= allowedNotWifiInaRowErrors) {
                         logI("Not wifi " + allowedNotWifiInaRowErrors + " times in a row, exiting");
@@ -146,7 +159,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         return Clock.systemUTC().instant();
     }
 
-    enum DownloadStatus {
+    public enum DownloadIterationResult {
         ERROR,
         COMPLETE,
         CONNECTION_LOST,
@@ -154,20 +167,20 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         CONNECTION_IS_NOT_WIFI
     }
 
-    private DownloadStatus downloadStream(Instant startInstant, String url, OutputStream output) {
+    private DownloadIterationResult downloadStream(Instant startInstant, String url, OutputStream output) {
         HttpURLConnection connection = null;
         InputStream input = null;
 
         try {
             connection = createConnection(url);
             if (connection == null) {
-                return DownloadStatus.CAN_NOT_CONNECT;
+                return DownloadIterationResult.CAN_NOT_CONNECT;
             }
 
             //Check again metered just in case wifi was disconnected right after check but before connection is performed.
             if (!allowMetered && isActiveNetworkMetered(context)) {
                 logD("Download not performed because network is metered");
-                return DownloadStatus.CONNECTION_IS_NOT_WIFI;
+                return DownloadIterationResult.CONNECTION_IS_NOT_WIFI;
             }
 
             // download the file
@@ -182,18 +195,18 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 Duration elapsedTime = Duration.between(startInstant, now);
 
                 if (elapsedTime.getSeconds() > downloadSeconds) {
-                    logI(String.format("Task Completed after %.2f hours", downloadSeconds / 60.0));
-                    return DownloadStatus.COMPLETE;
+                    logI(String.format("Task Completed after %.2f minutes", elapsedTime.getSeconds() / 60.0));
+                    return DownloadIterationResult.COMPLETE;
                 }
 
                 // allow canceling with back button
                 if (isCancelled()) {
-                    logI(String.format("Task canceled after %.2f hours", downloadSeconds / 60.0));
-                    return DownloadStatus.COMPLETE;
+                    logI(String.format("Task canceled after %.2f minutes", elapsedTime.getSeconds() / 60.0));
+                    return DownloadIterationResult.COMPLETE;
                 }
                 total += count;
 
-                if ((total - lastLog) > Configuration.LOG_UPDATE_SIZE_BYTES) {
+                if ((total - lastLog) > downloadLogRefreshInBytes) {
                     logI("Progress: " + getDownloadedSizeTag());
                     lastLog = total;
                 }
@@ -205,23 +218,31 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                     lastNotification = total;
                 }
 
+                if (downloadStatus == DownloadStatus.INTERRUPTED) {
+                    logI("Download resumed: " + getDownloadedSizeTag());
+                    lastLog = total;
+                }
+                if (downloadStatus == DownloadStatus.NOT_STARTED) {
+                    logI("Download started");
+                    lastLog = total;
+                }
+
+                downloadStatus = DownloadStatus.DOWNLOADING;
                 output.write(data, 0, count);
             }
 
-            return DownloadStatus.CONNECTION_LOST;
-        } catch (SocketException e) {
+            return DownloadIterationResult.CONNECTION_LOST;
+        } catch (Exception e) {
             String message = e.getMessage();
             if (message != null && message.contains("Software caused connection abort")) {
                 logI("Connection was stopped by software, probably wifi was lost.");
-                return DownloadStatus.CONNECTION_LOST;
+                return DownloadIterationResult.CONNECTION_LOST;
             } else {
                 logE("Downloading Error " + message, e);
             }
-            return DownloadStatus.ERROR;
-        } catch (Exception e) {
-            logE("Downloading Error " + e.getMessage(), e);
-            return DownloadStatus.ERROR;
+            return DownloadIterationResult.ERROR;
         } finally {
+            downloadStatus = DownloadStatus.INTERRUPTED;
             try {
                 if (input != null)
                     input.close();
@@ -258,7 +279,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             }
             return connection;
         } catch (IOException e) {
-            logE("Connection failed, will retry", e);
+            logD("Connection failed, will retry", e);
             return null;
         }
     }
@@ -304,7 +325,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             extra = " (appended!)";
         }
         if (retryCount > 0) {
-            extra += " retry: "+retryCount;
+            extra += " (r " + retryCount + ")";
         }
         return String.format(Locale.ENGLISH, "%.2fMb"+extra, total / (1024.0*1024.0));
     }

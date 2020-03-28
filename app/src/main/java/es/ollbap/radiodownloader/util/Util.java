@@ -72,7 +72,11 @@ public final class Util {
     }
 
     public static void logD(String message) {
-        log(Level.DEBUG, message, null);
+        logD(message, null);
+    }
+
+    public static void logD(String message, Throwable eToLog) {
+        log(Level.DEBUG, message, eToLog);
     }
 
     public static void logI(String message) {
@@ -236,7 +240,7 @@ public final class Util {
         String updateText = "Task is not running";
         DownloadTask instance = DownloadTask.getLastInstance();
         if (instance != null) {
-            updateText = "Download status "+instance.getStatus()+" "+instance.getDownloadedSizeTag();
+            updateText = "Download status "+instance.getDownloadStatus()+" "+instance.getDownloadedSizeTag();
             if (instance.isAllowMetered()) {
                 updateText += "\n(metered allowed)";
             }

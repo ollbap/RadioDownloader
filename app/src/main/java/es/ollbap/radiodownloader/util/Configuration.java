@@ -19,9 +19,6 @@ import java.util.Locale;
  * Created by ollbap on 1/20/18.
  */
 public class Configuration {
-    //Download Task configurations
-    public static final int LOG_UPDATE_SIZE_BYTES = 10 * (1024 * 1024);   // 10MB
-
     public static final String DOWNLOAD_FILE_NAME = "radio.mp3";
     public static final String DOWNLOAD_URL_OLD = "http://19093.live.streamtheworld.com:80/CADENASER_SC";
     public static final String DOWNLOAD_URL_NEW = "https://playerservices.streamtheworld.com/pls/CADENASER.pls";

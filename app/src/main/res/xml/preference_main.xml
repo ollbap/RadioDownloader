@@ -50,15 +50,22 @@
             android:entryValues="@array/log_level_entries"
             android:defaultValue="INFO" />
         <SeekBarPreference
-            android:key="refresh_notification_kb"
-            android:title="Refresh notification each Kb block sized"
+            android:key="refresh_download_notification_kb"
+            android:title="Refresh notification Kb block"
             android:max="512"
             android:min="2"
             app:showSeekBarValue="true"
             android:defaultValue="50" />
         <SeekBarPreference
+            android:key="refresh_download_log_mb"
+            android:title="Refresh log Mb block"
+            android:max="100"
+            android:min="1"
+            app:showSeekBarValue="true"
+            android:defaultValue="10" />
+        <SeekBarPreference
             android:key="allowed_not_wifi_in_a_row_errors"
-            android:title="Allowed not wifi un a row errors"
+            android:title="Allowed not wifi in a row errors"
             android:max="250"
             app:showSeekBarValue="true"
             android:defaultValue="50" />

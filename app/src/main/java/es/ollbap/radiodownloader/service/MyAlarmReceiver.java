@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import es.ollbap.radiodownloader.util.Util;
 
-import static es.ollbap.radiodownloader.util.Util.logD;
+import static es.ollbap.radiodownloader.util.Util.logI;
 
 /**
  * Created by ollbap on 1/13/18.
@@ -15,7 +15,7 @@ import static es.ollbap.radiodownloader.util.Util.logD;
 public class MyAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        logD("MyAlarmReceiver onReceive");
+        logI("Alarm event received");
         Util.programNextAlarm(context);
         Util.startForegroundService(context);
     }

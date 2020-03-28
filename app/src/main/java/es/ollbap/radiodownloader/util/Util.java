@@ -413,6 +413,9 @@ public final class Util {
 
     public static void playInVlc(Context context) {
         try {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            long skipMilliseconds = sharedPreferences.getInt("player_skip_seconds", 0) * 1000l;
+
             File outputFile = Configuration.getRadioOutputFile();
             String authority = context.getApplicationContext().getPackageName() + ".provider";
             Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
@@ -426,7 +429,7 @@ public final class Util {
             vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
             vlcIntent.putExtra("title", "Radio Download");
             vlcIntent.putExtra("from_start", false);
-            vlcIntent.putExtra("position", 0L);
+            vlcIntent.putExtra("position", skipMilliseconds);
             context.startActivity(vlcIntent);
         } catch (Exception e) {
             logE("Can not play in vlc", e);

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,10 +20,13 @@ import java.util.Locale;
 import es.ollbap.radiodownloader.util.Util;
 import es.ollbap.radiodownloader.util.Configuration;
 
+import static es.ollbap.radiodownloader.util.Util.createConnection;
 import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
 import static es.ollbap.radiodownloader.util.Util.logD;
 import static es.ollbap.radiodownloader.util.Util.logE;
 import static es.ollbap.radiodownloader.util.Util.logI;
+import static es.ollbap.radiodownloader.util.Util.resolveDownloadURL;
+import static es.ollbap.radiodownloader.util.Util.waitTime;
 
 public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
@@ -103,7 +105,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         }
 
         File outputFile = Configuration.getRadioOutputFile();
-        downloadUrl = resolveURL(downloadUrl);
+        downloadUrl = resolveDownloadURL(downloadUrl, 5);
         if (downloadUrl == null) {
             logE("URL can not be resolved, exiting");
             return null;
@@ -172,7 +174,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         InputStream input = null;
 
         try {
-            connection = createConnection(url);
+            connection = createConnectionWithRetry(url);
             if (connection == null) {
                 return DownloadIterationResult.CAN_NOT_CONNECT;
             }
@@ -254,69 +256,16 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         }
     }
 
-    private HttpURLConnection createConnection(String url) {
+    private HttpURLConnection createConnectionWithRetry(String url) {
         int max = 5;
         for (int i=0; i<max; i++) {
-            HttpURLConnection connection = createConnectionInternal(url);
+            HttpURLConnection connection = createConnection(url);
             if (connection != null) {
                 return connection;
             }
             waitTime(250);
         }
         return null;
-    }
-
-    private HttpURLConnection createConnectionInternal(String url) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.connect();
-
-            // expect HTTP 200 OK, so we don't mistakenly save error report
-            // instead of the file
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                logE("Error connecting: " + connection.getResponseCode() + " " + connection.getResponseMessage());
-                return null;
-            }
-            return connection;
-        } catch (IOException e) {
-            logD("Connection failed, will retry", e);
-            return null;
-        }
-    }
-
-    private String resolveURL(String url) {
-        int max = 5;
-        for (int i=0; i<max; i++) {
-            String resolved = resolveURLInternal(url);
-            if (resolved != null) {
-                return resolved;
-            }
-
-            logE("Resolve error, " + i + "/" + max);
-
-            waitTime(250);
-        }
-        return null;
-    }
-
-    private void waitTime(int i) {
-        try {
-            Thread.sleep(i);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logE("Interrupted", e);
-        }
-    }
-
-    private String resolveURLInternal(String url) {
-        if (url.endsWith("m3u")) {
-            url = Util.resolveM3u(url);
-            logD("Resolved URL " + url);
-        } else if (url.endsWith("pls")) {
-            url  = Util.resolvePls(url);
-            logD("Resolved URL " + url);
-        }
-        return url;
     }
 
     public String getDownloadedSizeTag() {

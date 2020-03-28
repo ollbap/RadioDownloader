@@ -18,6 +18,7 @@ import android.os.PowerManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,11 +28,11 @@ import es.ollbap.radiodownloader.util.Time;
 import es.ollbap.radiodownloader.util.Util;
 
 import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
-import static es.ollbap.radiodownloader.util.Util.logI;
 
 public class MainActivity extends AppCompatActivity {
 
     private Timer autoUpdate;
+    private UrlValidationTask urlValidationTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,18 +107,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         requestPermissions();
-        Util.applyConfigurationChanges(this);
         autoUpdate = new Timer();
+        revalidateDownloadUrl();
         autoUpdate.schedule(new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        refreshContent();
-                    }
-                });
+                runOnUiThread(() -> refreshContent());
             }
         }, 0, 1000);
+    }
+
+    private void revalidateDownloadUrl() {
+       urlValidationTask = new UrlValidationTask(this);
+       urlValidationTask.execute();
     }
 
     @Override
@@ -153,6 +155,14 @@ public class MainActivity extends AppCompatActivity {
         String lastProgramedAlarm = "Not programmed";
         if (lastProgramedAlarmTime != -1) {
             lastProgramedAlarm = Util.formatMilliseconds(lastProgramedAlarmTime);
+        }
+
+        String downloadUrl = sharedPreferences.getString("download_url", "");
+
+        UrlValidationTask validationTask = urlValidationTask;
+        if (validationTask != null && Boolean.FALSE.equals(validationTask.getDownloadUrlIsValid())) {
+            sb.append("Download URL is invalid!");
+            sb.append("\n");
         }
 
         sb.append("[L-V]   ");

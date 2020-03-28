@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -448,6 +449,61 @@ public final class Util {
     public static void applyConfigurationChanges(Context context) {
         refreshConfiguredLogLevel(context);
         programNextAlarm(context);
+    }
+
+    public static String resolveDownloadURL(String url, int retry) {
+        int max = 5;
+        for (int i = 0; i < retry+1; i++) {
+            if (i != 0) {
+                waitTime(250);
+            }
+            String resolved = resolveDownloadURLInternal(url);
+            if (resolved != null) {
+                return resolved;
+            }
+
+            logE("Resolve error, " + i + "/" + max);
+
+        }
+        return null;
+    }
+
+    private static String resolveDownloadURLInternal(String url) {
+        if (url.endsWith("m3u")) {
+            url = Util.resolveM3u(url);
+            logD("Resolved URL " + url);
+        } else if (url.endsWith("pls")) {
+            url  = Util.resolvePls(url);
+            logD("Resolved URL " + url);
+        }
+        return url;
+    }
+
+    public static void waitTime(int i) {
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logE("Interrupted", e);
+        }
+    }
+
+    public static HttpURLConnection createConnection(String url) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.connect();
+
+            // expect HTTP 200 OK, so we don't mistakenly save error report
+            // instead of the file
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                logE("Error connecting: " + connection.getResponseCode() + " " + connection.getResponseMessage());
+                return null;
+            }
+            return connection;
+        } catch (IOException e) {
+            logD("Connection failed, will retry", e);
+            return null;
+        }
     }
 
 }

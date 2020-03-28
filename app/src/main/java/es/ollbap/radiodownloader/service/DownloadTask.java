@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.time.Clock;
 import java.time.Duration;
@@ -32,7 +33,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
     private static DownloadTask lastInstance = null;
 
-    private Context context;
+    private WeakReference<Context> contextReference;
     private int total = 0;
     private boolean append;
     private int retryCount = 0;
@@ -57,7 +58,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
     public DownloadTask(Context context, boolean append) {
         this.append = append;
-        this.context = context;
+        this.contextReference = new WeakReference<>(context);
         synchronized (LOCK) {
             if (lastInstance != null) {
                 lastInstance.cancel(true);
@@ -117,7 +118,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             while (retryCount <= allowedErrorRetries) {
                 long retryStart = System.nanoTime();
                 DownloadIterationResult result = downloadStream(startInstant, downloadUrl, output);
-                Util.updateForegroundServiceNotification(context);
+                Util.updateForegroundServiceNotification(getContext());
                 switch (result) {
                     case CAN_NOT_CONNECT:
                     case CONNECTION_LOST:
@@ -151,7 +152,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         } catch (Exception e) {
             logE("Error downloading", e);
         } finally {
-            Util.stopForegroundService(context);
+            Util.stopForegroundService(getContext());
         }
 
         return null;
@@ -180,7 +181,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             }
 
             //Check again metered just in case wifi was disconnected right after check but before connection is performed.
-            if (!allowMetered && isActiveNetworkMetered(context)) {
+            if (!allowMetered && isActiveNetworkMetered(getContext())) {
                 logD("Download not performed because network is metered");
                 return DownloadIterationResult.CONNECTION_IS_NOT_WIFI;
             }
@@ -214,8 +215,8 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 }
 
                 if ((total - lastNotification) > downloadNotificationRefreshInBytes) {
-                    Util.updateForegroundServiceNotification(context);
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    Util.updateForegroundServiceNotification(getContext());
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
                     refreshConfigurationForNotificationRefresh(sharedPreferences);
                     lastNotification = total;
                 }
@@ -286,5 +287,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
     public boolean isAllowMetered() {
         return allowMetered;
+    }
+
+    public Context getContext() {
+        Context context = contextReference.get();
+        if (context == null) {
+            throw new IllegalStateException("Context reference was lost");
+        }
+        return context;
     }
 }

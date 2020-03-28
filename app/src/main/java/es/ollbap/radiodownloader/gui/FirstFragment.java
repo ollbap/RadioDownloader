@@ -28,13 +28,8 @@ public class FirstFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         FloatingActionButton fab = view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment
-                        .findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
-            }
-        });
+        fab.setOnClickListener(v -> NavHostFragment
+                .findNavController(FirstFragment.this)
+                .navigate(R.id.action_FirstFragment_to_SecondFragment));
     }
 }

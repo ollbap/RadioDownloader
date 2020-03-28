@@ -30,35 +30,17 @@ public class SecondFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.button_second_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
-            }
+        view.findViewById(R.id.button_second_back).setOnClickListener(v -> NavHostFragment.findNavController(SecondFragment.this)
+                    .navigate(R.id.action_SecondFragment_to_FirstFragment));
+
+        view.findViewById(R.id.button_test_10s).setOnClickListener(v -> programTestAlarm(v.getContext(), 1000*10));
+
+        view.findViewById(R.id.button_test_clear_preferences).setOnClickListener(v -> {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(v.getContext());
+            sharedPreferences.edit().clear().apply();
         });
 
-        view.findViewById(R.id.button_test_10s).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                programTestAlarm(view.getContext(), 1000*10);
-            }
-        });
-
-        view.findViewById(R.id.button_test_clear_preferences).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-                sharedPreferences.edit().clear().apply();
-            }
-        });
-
-        view.findViewById(R.id.button_test_configure_next_alarm).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            Util.programNextAlarm(view.getContext());
-            }
-        });
+        view.findViewById(R.id.button_test_configure_next_alarm).setOnClickListener(v -> Util.programNextAlarm(v.getContext()));
 
     }
 }

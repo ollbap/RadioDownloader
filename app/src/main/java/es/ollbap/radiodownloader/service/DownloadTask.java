@@ -23,8 +23,10 @@ import es.ollbap.radiodownloader.util.Util;
 import es.ollbap.radiodownloader.util.Configuration;
 
 import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
+import static es.ollbap.radiodownloader.util.Util.logD;
 import static es.ollbap.radiodownloader.util.Util.logE;
 import static es.ollbap.radiodownloader.util.Util.logI;
+import static es.ollbap.radiodownloader.util.Util.logW;
 
 public class DownloadTask extends AsyncTask<String, Integer, String> {
     private static final Object LOCK = new Object();
@@ -110,7 +112,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                         // seems like not wifi and then becomes wifi.
                     case CONNECTION_IS_NOT_WIFI:
                         retryCount++;
-                        logI("Download retry "+retryCount+"/"+allowedErrorRetries);
+                        logW("Download retry " + retryCount + "/" + allowedErrorRetries);
                         //If just tried wait for a second.
                         if ((System.nanoTime() - retryStart) < WAIT_FOR_RETRY_SECONDS * 1000000000L) {
                             waitTime(WAIT_FOR_RETRY_SECONDS * 1000);
@@ -118,7 +120,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
                         break;
                     case COMPLETE:
-                        logI("Exit download thread after completed execution");
                         return null;
                 }
 
@@ -165,7 +166,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
             //Check again metered just in case wifi was disconnected right after check but before connection is performed.
             if (!allowMetered && isActiveNetworkMetered(context)) {
-                logE("Download not performed because network is metered");
+                logD("Download not performed because network is metered");
                 return DownloadStatus.CONNECTION_IS_NOT_WIFI;
             }
 
@@ -181,13 +182,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 Duration elapsedTime = Duration.between(startInstant, now);
 
                 if (elapsedTime.getSeconds() > downloadSeconds) {
-                    logI("Task Completed faster duration " + downloadSeconds + " seconds");
+                    logI(String.format("Task Completed after %.2f hours", downloadSeconds / 60.0));
                     return DownloadStatus.COMPLETE;
                 }
 
                 // allow canceling with back button
                 if (isCancelled()) {
-                    logI("Task background thread found cancelled state, exiting.");
+                    logI(String.format("Task canceled after %.2f hours", downloadSeconds / 60.0));
                     return DownloadStatus.COMPLETE;
                 }
                 total += count;
@@ -221,7 +222,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             logE("Downloading Error " + e.getMessage(), e);
             return DownloadStatus.ERROR;
         } finally {
-            logI("Downloading Exited");
             try {
                 if (input != null)
                     input.close();
@@ -271,7 +271,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                 return resolved;
             }
 
-            logE("Resolve error, "+i+"/"+max);
+            logE("Resolve error, " + i + "/" + max);
 
             waitTime(250);
         }
@@ -290,10 +290,10 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private String resolveURLInternal(String url) {
         if (url.endsWith("m3u")) {
             url = Util.resolveM3u(url);
-            logI("Resolved URL " + url);
+            logD("Resolved URL " + url);
         } else if (url.endsWith("pls")) {
             url  = Util.resolvePls(url);
-            logI("Resolved URL " + url);
+            logD("Resolved URL " + url);
         }
         return url;
     }
@@ -311,6 +311,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
     public void toggleMetered() {
         allowMetered = !allowMetered;
+        logI("Toggled metered restrictions: " + allowMetered);
     }
 
     public boolean isAllowMetered() {

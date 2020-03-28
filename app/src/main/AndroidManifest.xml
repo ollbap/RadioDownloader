@@ -52,7 +52,7 @@
 
         <receiver android:name="es.ollbap.radiodownloader.service.MyAlarmReceiver">
             <intent-filter>
-                <action android:name="com.example.android.repeatingalarm" />
+                <action android:name="es.ollbap.radiodownloader" />
             </intent-filter>
         </receiver>
         <receiver android:name="es.ollbap.radiodownloader.service.ServiceStarter">

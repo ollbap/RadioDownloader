@@ -2,6 +2,7 @@
 <resources>
     <string-array name="log_level_entries" >
         <item>ERROR</item>
+        <item>WARNING</item>
         <item>INFO</item>
         <item>DEBUG</item>
     </string-array>

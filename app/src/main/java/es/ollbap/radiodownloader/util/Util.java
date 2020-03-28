@@ -39,32 +39,80 @@ import es.ollbap.radiodownloader.service.MyAlarmReceiver;
 public final class Util {
     private static final int PROGRAM_DOWNLOAD_REQUEST_CODE = 0;
     private static final String CHARSET = "UTF-8";
+    public static final String LAST_PROGRAMED_ALARM_PREFERENCE_KEY = "last_programed_alarm";
+    private static Level configuredLevel = Level.INFO;
+    public enum Level {
+        ERROR,
+        WARNING,
+        INFO,
+        DEBUG
+        }
 
     private Util() {}
+
+    public static void refreshConfiguredLogLevel(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String levelTag = sharedPreferences.getString("log_level", "INFO");
+        Level level;
+        try {
+            level = Level.valueOf(levelTag);
+        } catch (Exception e) {
+            logE("Incorrect log level tag" + levelTag);
+            level = Level.INFO;
+        }
+        if (configuredLevel != level) {
+            logI("Log level changed to " + level);
+        }
+        configuredLevel = level;
+    }
 
     public static String getTimeTag() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss", Locale.ENGLISH);
         return simpleDateFormat.format(new Date());
     }
 
+    public static void logD(String message) {
+        log(Level.DEBUG, message, null);
+    }
+
     public static void logI(String message) {
-        log("INFO", message, null);
+        log(Level.INFO, message, null);
+    }
+
+    public static void logW(String message) {
+        log(Level.WARNING, message, null);
     }
 
     public static void logE(String message, Throwable e) {
-        log("ERROR", message, e);
+        log(Level.ERROR, message, e);
     }
 
     public static void logE(String message) {
-        log("ERROR", message, null);
+        log(Level.ERROR, message, null);
     }
 
-    public static void log(String tag, String message, Throwable eToLog) {
+    public static void log(Level level, String message, Throwable eToLog) {
         File logFile = Configuration.getRadioLogOutputFile();
 
-        switch (tag) {
-            case "ERROR": Log.e("Util", message, eToLog);
-            default: Log.i("Util", message, eToLog);
+        switch (level) {
+            //case "ERROR": Log.e("Util", message, eToLog);
+            //default: Log.i("Util", message, eToLog);
+            case ERROR:
+                Log.e("Util", message, eToLog);
+                break;
+            case WARNING:
+                Log.w("Util", message, eToLog);
+                break;
+            case INFO:
+                Log.i("Util", message, eToLog);
+                break;
+            case DEBUG:
+                Log.d("Util", message, eToLog);
+                break;
+        }
+
+        if (configuredLevel.ordinal() < level.ordinal()) {
+            return;
         }
 
         File containingDir = logFile.getParentFile();
@@ -75,9 +123,7 @@ public final class Util {
         boolean append = logFile.exists();
 
         try (PrintStream out = new PrintStream(new FileOutputStream(logFile, append))) {
-            Log.i("DownloadTask", message);
-            out.println(getTimeTag() + " "+tag+" " + message);
-            out.flush();
+            out.println(getTimeTag() + " "+level+" " + message);
             if (eToLog != null) {
                 eToLog.printStackTrace(out);
             }
@@ -94,9 +140,6 @@ public final class Util {
 
     public static Calendar programTestAlarm(Context context, long waitTime) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        //calendar.set(Calendar.HOUR_OF_DAY, 12);
-        //calendar.set(Calendar.MINUTE, 30);
         calendar.setTimeInMillis(System.currentTimeMillis()+waitTime);
 
         long alarmTime = calendar.getTimeInMillis();
@@ -184,7 +227,7 @@ public final class Util {
 
     public static void cancelDownloadTask(DownloadTask downloadTask) {
         if (downloadTask != null) {
-            logI("DownloadTask cancel executed, background thread should cancel itself if still running.");
+            logD("DownloadTask cancel executed, background thread should cancel itself if still running.");
             downloadTask.cancel(true);
         }
     }
@@ -206,11 +249,22 @@ public final class Util {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         assert alarmMgr != null : "AlarmManager can not be retrieved";
         Intent intent = new Intent(context, MyAlarmReceiver.class);
-        intent.setAction("com.example.android.repeatingalarm");
+        intent.setAction(context.getApplicationContext().getPackageName());
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, PROGRAM_DOWNLOAD_REQUEST_CODE, intent, 0);
         alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        long lastProgramedAlarmTime = sharedPreferences.getLong(LAST_PROGRAMED_ALARM_PREFERENCE_KEY, -1);
+        sharedPreferences.edit().putLong(LAST_PROGRAMED_ALARM_PREFERENCE_KEY, alarmTime).apply();
+
+        if (lastProgramedAlarmTime != alarmTime) {
+            logI("Alarm reprogrammed at: " + formatMilliseconds(alarmTime));
+        }
+    }
+
+    public static String formatMilliseconds(long alarmTime) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
-        logI("Alarm programmed at: "+format.format(alarmTime));
+        return format.format(alarmTime);
     }
 
     public static boolean isWeekend(int dayOfWeek) {
@@ -379,12 +433,17 @@ public final class Util {
         assert mConnectivity != null;
 
         if (mConnectivity.isActiveNetworkMetered()) {
-            logE("Current network is metered");
+            logD("Current network is metered");
             return true;
         }
 
-        logI("Current network is not metered");
+        logD("Current network is not metered");
         return false;
+    }
+
+    public static void applyConfigurationChanges(Context context) {
+        refreshConfiguredLogLevel(context);
+        programNextAlarm(context);
     }
 
 }

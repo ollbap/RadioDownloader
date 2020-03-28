@@ -3,6 +3,7 @@ package es.ollbap.radiodownloader.gui;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuCompat;
+import androidx.preference.PreferenceManager;
 
 import android.os.PowerManager;
 import android.view.Menu;
@@ -56,34 +58,28 @@ public class MainActivity extends AppCompatActivity {
 
         if(id == R.id.start_download) {
             Util.startForegroundService(this);
-            logI("Download started.");
         }
 
         if(id == R.id.cancel_download) {
             Util.stopForegroundService(this);
-            logI("Cancel download.");
         }
 
         if(id == R.id.open_radio_file) {
             Util.openRadioFile(this);
-            logI("Cancel download.");
         }
 
         if(id == R.id.open_log_file) {
             Util.openLogFile(this);
-            logI("Cancel download.");
         }
 
         if(id == R.id.open_vlc) {
             Util.playInVlc(this);
-            logI("Cancel download.");
         }
 
         if(id == R.id.toggle_metered) {
             DownloadTask lastInstance = DownloadTask.getLastInstance();
             if (lastInstance != null) {
                 lastInstance.toggleMetered();
-                logI("toggled metered restrictions");
             }
         }
 
@@ -110,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         requestPermissions();
+        Util.applyConfigurationChanges(this);
         autoUpdate = new Timer();
         autoUpdate.schedule(new TimerTask() {
             @Override
@@ -120,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        }, 0, 1000); //
+        }, 0, 1000);
     }
 
     @Override
@@ -151,12 +148,22 @@ public class MainActivity extends AppCompatActivity {
             weekendTime = "Format error";
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long lastProgramedAlarmTime = sharedPreferences.getLong(Util.LAST_PROGRAMED_ALARM_PREFERENCE_KEY, -1);
+        String lastProgramedAlarm = "Not programmed";
+        if (lastProgramedAlarmTime != -1) {
+            lastProgramedAlarm = Util.formatMilliseconds(lastProgramedAlarmTime);
+        }
+
         sb.append("[L-V]   ");
         sb.append(weekdayTime);
         sb.append("\n");
 
         sb.append("[S-D]   ");
         sb.append(weekendTime);
+        sb.append("\n");
+        sb.append("Next alarm: ");
+        sb.append(lastProgramedAlarm);
         sb.append("\n");
 
         sb.append("\n");

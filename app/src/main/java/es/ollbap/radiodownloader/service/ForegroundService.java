@@ -129,7 +129,7 @@ public class ForegroundService extends Service {
     }
 
     private void onStartServiceAction(boolean appendDownload) {
-        logI("Received Start Foreground Intent ");
+        logD("Received Start Foreground Intent ");
         requestLocks();
         createNotificationBuilder();
         showNotificationAndStartForeground();
@@ -138,12 +138,12 @@ public class ForegroundService extends Service {
     }
 
     private void onStopServiceAction() {
-        logI("Received Stop Foreground Intent");
         Util.cancelDownloadTask(downloadTask);
         mBuilder = null;
         releaseLocks();
         stopForeground(true);
         stopSelf();
+        logD("Service stopped");
     }
 
     private void requestLocks() {

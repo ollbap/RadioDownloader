@@ -14,7 +14,7 @@ public class ServiceStarter extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Util.logI("Received system intent: " + action);
+        Util.logD("Received system intent: " + action);
         if (action != null) {
             switch (action) {
                 case Intent.ACTION_BOOT_COMPLETED:

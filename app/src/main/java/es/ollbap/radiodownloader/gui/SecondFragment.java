@@ -1,5 +1,6 @@
 package es.ollbap.radiodownloader.gui;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.preference.PreferenceManager;
 
 import es.ollbap.radiodownloader.R;
 import es.ollbap.radiodownloader.util.Util;
@@ -31,7 +33,7 @@ public class SecondFragment extends Fragment {
         view.findViewById(R.id.button_second_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
+            NavHostFragment.findNavController(SecondFragment.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
         });
@@ -43,10 +45,18 @@ public class SecondFragment extends Fragment {
             }
         });
 
+        view.findViewById(R.id.button_test_clear_preferences).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+                sharedPreferences.edit().clear().apply();
+            }
+        });
+
         view.findViewById(R.id.button_test_configure_next_alarm).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Util.programNextAlarm(view.getContext());
+            Util.programNextAlarm(view.getContext());
             }
         });
 

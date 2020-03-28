@@ -31,15 +31,24 @@
             android:title="Weekday start time"
             android:defaultValue="06:00"
             android:inputType="time"
+            app:useSimpleSummaryProvider="true"
             />
         <EditTextPreference
             android:key="weekend_start_time"
             android:title="Weekend start time"
             android:defaultValue="08:00"
             android:inputType="time"
+            app:useSimpleSummaryProvider="true"
             />
     </PreferenceCategory>
     <PreferenceCategory android:title="Debugging">
+        <ListPreference
+            android:key="log_level"
+            android:title="Log Level"
+            android:summary="%s"
+            android:entries="@array/log_level_entries"
+            android:entryValues="@array/log_level_entries"
+            android:defaultValue="INFO" />
         <SeekBarPreference
             android:key="refresh_notification_kb"
             android:title="Refresh notification each Kb block sized"

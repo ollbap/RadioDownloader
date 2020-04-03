@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -15,6 +16,7 @@ import androidx.core.view.MenuCompat;
 import androidx.preference.PreferenceManager;
 
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -101,6 +103,31 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     requestCode);
         }
+
+        if (!checkIsIgnoringBatteryOptimization()) {
+            openPowerSettings(this);
+        }
+    }
+
+    private void openPowerSettings(Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle("Batter optimizations")
+                .setMessage("Batter optimizations are enabled for application. \n" +
+                        "Optimizations need to be disabled or download will not start automatically\n" +
+                        "Open configuration?")
+
+                // Specifying a listener allows you to take an action before dismissing the dialog.
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    context.startActivity(intent);
+                })
+
+                // A null listener allows the button to dismiss the dialog and take no further action.
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
     @Override
@@ -179,9 +206,7 @@ public class MainActivity extends AppCompatActivity {
         sb.append("\n");
         sb.append(Util.getDownloadTaskProgress());
 
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        assert pm != null;
-        boolean ignoringBatteryOptimization = pm.isIgnoringBatteryOptimizations(getPackageName());
+        boolean ignoringBatteryOptimization = checkIsIgnoringBatteryOptimization();
 
         sb.append("\n\n\n\n");
 
@@ -193,5 +218,11 @@ public class MainActivity extends AppCompatActivity {
         sb.append("\n");
 
         toolbar.setText(sb.toString());
+    }
+
+    private boolean checkIsIgnoringBatteryOptimization() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        assert pm != null;
+        return pm.isIgnoringBatteryOptimizations(getPackageName());
     }
 }

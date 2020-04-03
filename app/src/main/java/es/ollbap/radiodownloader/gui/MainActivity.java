@@ -33,12 +33,14 @@ import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final boolean REQUIRE_EXTERNAL_STORAGE_PERMISSIONS = false;
     private Timer autoUpdate;
     private UrlValidationTask urlValidationTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Util.configureLogFile(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,12 +98,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermissions() {
-        int p = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (p != PackageManager.PERMISSION_GRANTED) {
-            int requestCode = 123;
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    requestCode);
+        if (REQUIRE_EXTERNAL_STORAGE_PERMISSIONS) {
+            int p = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (p != PackageManager.PERMISSION_GRANTED) {
+                int requestCode = 123;
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        requestCode);
+            }
         }
 
         if (!checkIsIgnoringBatteryOptimization()) {
@@ -187,9 +191,12 @@ public class MainActivity extends AppCompatActivity {
         String downloadUrl = sharedPreferences.getString("download_url", "");
 
         UrlValidationTask validationTask = urlValidationTask;
-        if (validationTask != null && Boolean.FALSE.equals(validationTask.getDownloadUrlIsValid())) {
-            sb.append("Download URL is invalid!");
-            sb.append("\n");
+        if (validationTask != null && validationTask.getDownloadUrlIsValidationResult() != null) {
+            String downloadUrlIsValidationResult = validationTask.getDownloadUrlIsValidationResult();
+            if (!downloadUrlIsValidationResult.isEmpty()) {
+                sb.append(downloadUrlIsValidationResult);
+                sb.append("\n");
+            }
         }
 
         sb.append("[L-V]   ");

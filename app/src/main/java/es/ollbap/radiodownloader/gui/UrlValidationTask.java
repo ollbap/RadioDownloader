@@ -13,36 +13,48 @@ import es.ollbap.radiodownloader.util.Util;
 
 import static es.ollbap.radiodownloader.util.Util.logD;
 
-public class UrlValidationTask extends AsyncTask<Void, Void, Void> {
-    private Boolean downloadUrlIsValid = null;
+public class UrlValidationTask extends AsyncTask<Void, Void, String> {
+    private String result = null;
     private WeakReference<Context> weakContext;
 
     public UrlValidationTask(Context context) {
         weakContext = new WeakReference<>(context);
     }
 
-    public Boolean getDownloadUrlIsValid() {
-        return downloadUrlIsValid;
+    public String getDownloadUrlIsValidationResult() {
+        return result;
     }
 
     @Override
-    protected Void doInBackground(Void... objects) {
+    protected String doInBackground(Void... objects) {
+        result = runValidation(weakContext.get());
+        return result;
+    }
+
+    private static String runValidation(Context context) {
         try {
-            Context context = weakContext.get();
             if (context == null) {
-                return null;
+                return "";
             }
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             String downloadUrl = sharedPreferences.getString("download_url", "");
+            if (downloadUrl.isEmpty()) {
+                return "URL is invalid: not configured yet.";
+            }
             String resolved = Util.resolveDownloadURL(downloadUrl, 0);
             if (resolved == null) {
-                downloadUrlIsValid = false;
+                return "URL is invalid: can not be resolved.";
             }
 
             HttpURLConnection connection = null;
             try {
                 connection = Util.createConnection(downloadUrl);
-                downloadUrlIsValid = connection != null;
+                if (connection != null) {
+                    return "";
+                } else {
+                    return "URL is invalid: can not connect";
+                }
+
             } finally {
                 if (connection != null) {
                     connection.disconnect();
@@ -50,8 +62,7 @@ public class UrlValidationTask extends AsyncTask<Void, Void, Void> {
             }
         } catch (Exception e) {
             logD("URL validation failed", e);
-            downloadUrlIsValid = false;
+            return "URL is invalid: " + e.getMessage();
         }
-        return null;
     }
 }

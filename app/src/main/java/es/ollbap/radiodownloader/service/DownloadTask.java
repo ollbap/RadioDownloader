@@ -105,7 +105,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             return null;
         }
 
-        File outputFile = Configuration.getRadioOutputFile();
+        File outputFile = Configuration.getRadioOutputFile(getContext());
         downloadUrl = resolveDownloadURL(downloadUrl, 5);
         if (downloadUrl == null) {
             logE("URL can not be resolved, exiting");

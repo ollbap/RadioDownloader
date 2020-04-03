@@ -38,6 +38,7 @@ import es.ollbap.radiodownloader.service.MyAlarmReceiver;
  * Created by ollbap on 1/13/18.
  */
 public final class Util {
+    private static File logFile = null;
     private static final int PROGRAM_DOWNLOAD_REQUEST_CODE = 0;
     private static final String CHARSET = "UTF-8";
     public static final String LAST_PROGRAMED_ALARM_PREFERENCE_KEY = "last_programed_alarm";
@@ -72,6 +73,10 @@ public final class Util {
         return simpleDateFormat.format(new Date());
     }
 
+    public static void configureLogFile(Context context) {
+        logFile = Configuration.getRadioLogOutputFile(context);
+    }
+
     public static void logD(String message) {
         logD(message, null);
     }
@@ -97,8 +102,6 @@ public final class Util {
     }
 
     public static void log(Level level, String message, Throwable eToLog) {
-        File logFile = Configuration.getRadioLogOutputFile();
-
         switch (level) {
             //case "ERROR": Log.e("Util", message, eToLog);
             //default: Log.i("Util", message, eToLog);
@@ -116,7 +119,7 @@ public final class Util {
                 break;
         }
 
-        if (configuredLevel.ordinal() < level.ordinal()) {
+        if (configuredLevel.ordinal() < level.ordinal() || logFile == null) {
             return;
         }
 
@@ -389,11 +392,11 @@ public final class Util {
     }
 
     public static void openLogFile(Context context) {
-        openFile(context, Configuration.getRadioLogOutputFile(), "text/plain");
+        openFile(context, Configuration.getRadioLogOutputFile(context), "text/plain");
     }
 
     public static void openRadioFile(Context context) {
-        openFile(context, Configuration.getRadioOutputFile(), "audio/*");
+        openFile(context, Configuration.getRadioOutputFile(context), "audio/*");
     }
 
     public static void openFile(Context context, File file, String type) {
@@ -416,7 +419,7 @@ public final class Util {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             long skipMilliseconds = sharedPreferences.getInt("player_skip_seconds", 0) * 1000l;
 
-            File outputFile = Configuration.getRadioOutputFile();
+            File outputFile = Configuration.getRadioOutputFile(context);
             String authority = context.getApplicationContext().getPackageName() + ".provider";
             Uri uri = FileProvider.getUriForFile(context,authority, outputFile);
 

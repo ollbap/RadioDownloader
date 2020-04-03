@@ -3,19 +3,20 @@
     package="es.ollbap.radiodownloader">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
+        android:name=".RadioDownloaderApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor">
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -50,11 +51,7 @@
 
         <service android:name="es.ollbap.radiodownloader.service.ForegroundService" />
 
-        <receiver android:name="es.ollbap.radiodownloader.service.MyAlarmReceiver">
-            <intent-filter>
-                <action android:name="es.ollbap.radiodownloader" />
-            </intent-filter>
-        </receiver>
+        <receiver android:name="es.ollbap.radiodownloader.service.MyAlarmReceiver" />
         <receiver android:name="es.ollbap.radiodownloader.service.ServiceStarter">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

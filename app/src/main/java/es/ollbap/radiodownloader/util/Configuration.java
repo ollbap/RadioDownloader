@@ -51,13 +51,14 @@ public class Configuration {
         Configuration.createChannelsIfNeeded(context);
     }
 
-    public static File getRadioOutputFile() {
-        return new File(getOutputDirectory(), Configuration.DOWNLOAD_FILE_NAME);
+    public static File getRadioOutputFile(Context context) {
+        return new File(getOutputDirectory(context), Configuration.DOWNLOAD_FILE_NAME);
     }
 
     @NonNull
-    public static File getOutputDirectory() {
-        File outputDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "radioDownloader");
+    public static File getOutputDirectory(Context context) {
+        File outputDir = context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS);
+        assert outputDir != null;
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();
@@ -66,12 +67,12 @@ public class Configuration {
     }
 
     private static String logTimeStampCache = null;
-    public static File getRadioLogOutputFile() {
+    public static File getRadioLogOutputFile(Context context) {
         if (logTimeStampCache == null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             logTimeStampCache = dateFormat.format(new Date());
         }
 
-        return new File(getOutputDirectory(), "radio_stream_"+logTimeStampCache+"_log.txt");
+        return new File(getOutputDirectory(context), "radio_stream_"+logTimeStampCache+"_log.txt");
     }
 }

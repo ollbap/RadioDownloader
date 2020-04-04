@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 import es.ollbap.radiodownloader.service.DownloadTask;
 import es.ollbap.radiodownloader.service.ForegroundService;
@@ -142,10 +143,17 @@ public final class Util {
         }
     }
 
-    public static Calendar programNextAlarm(Context context) {
-        Calendar nextAlarmTime = computeNextAlarmTime(context);
-        programAlarm(context, nextAlarmTime.getTimeInMillis());
-        return nextAlarmTime;
+    public static Optional<Calendar> programNextAlarm(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean enabled = sharedPreferences.getBoolean("download_enabled", true);
+        if (enabled) {
+            Calendar nextAlarmTime = computeNextAlarmTime(context);
+            programAlarm(context, nextAlarmTime.getTimeInMillis());
+            return Optional.of(nextAlarmTime);
+        } else {
+            clearAlarm(context);
+            return Optional.empty();
+        }
     }
 
     public static Calendar programTestAlarm(Context context, long waitTime) {
@@ -198,6 +206,7 @@ public final class Util {
 
     public static Time getStartTime(Context context, boolean isWeekend) throws Time.IncorrectTimeFormatException {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         String value;
         if (isWeekend) {
             value = sharedPreferences.getString("weekend_start_time", "08:00");
@@ -255,6 +264,23 @@ public final class Util {
         }
 
         return updateText;
+    }
+
+    public static void clearAlarm(Context context) {
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        assert alarmMgr != null : "AlarmManager can not be retrieved";
+        Intent intent = new Intent(context, MyAlarmReceiver.class);
+        intent.setAction(context.getApplicationContext().getPackageName());
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, PROGRAM_DOWNLOAD_REQUEST_CODE, intent, 0);
+        alarmMgr.cancel(alarmIntent);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        long lastProgramedAlarmTime = sharedPreferences.getLong(LAST_PROGRAMED_ALARM_PREFERENCE_KEY, -1);
+        sharedPreferences.edit().putLong(LAST_PROGRAMED_ALARM_PREFERENCE_KEY, -1).apply();
+
+        if (lastProgramedAlarmTime != -1) {
+            logI("Alarm cleared");
+        }
     }
 
     public static void programAlarm(Context context, long alarmTime) {
@@ -448,11 +474,9 @@ public final class Util {
         assert mConnectivity != null;
 
         if (mConnectivity.isActiveNetworkMetered()) {
-            logD("Current network is metered");
             return true;
         }
 
-        logD("Current network is not metered");
         return false;
     }
 

@@ -261,7 +261,7 @@ public final class Util {
         Intent intent = new Intent(context, MyAlarmReceiver.class);
         intent.setAction(context.getApplicationContext().getPackageName());
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, PROGRAM_DOWNLOAD_REQUEST_CODE, intent, 0);
-        alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+        alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         long lastProgramedAlarmTime = sharedPreferences.getLong(LAST_PROGRAMED_ALARM_PREFERENCE_KEY, -1);

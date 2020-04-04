@@ -34,6 +34,7 @@ import static es.ollbap.radiodownloader.util.Util.isActiveNetworkMetered;
 public class MainActivity extends AppCompatActivity {
 
     private static final boolean REQUIRE_EXTERNAL_STORAGE_PERMISSIONS = false;
+    private static final boolean REQUIRE_DISABLE_BATTERY_OPTIMIZATIONS = false;
     private Timer autoUpdate;
     private UrlValidationTask urlValidationTask = null;
 
@@ -108,8 +109,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (!checkIsIgnoringBatteryOptimization()) {
-            openPowerSettings(this);
+        if (REQUIRE_DISABLE_BATTERY_OPTIMIZATIONS) {
+            if (!checkIsIgnoringBatteryOptimization()) {
+                openPowerSettings(this);
+            }
         }
     }
 
@@ -213,12 +216,14 @@ public class MainActivity extends AppCompatActivity {
         sb.append("\n");
         sb.append(Util.getDownloadTaskProgress());
 
-        boolean ignoringBatteryOptimization = checkIsIgnoringBatteryOptimization();
 
         sb.append("\n\n\n\n");
 
-        if (!ignoringBatteryOptimization) {
-            sb.append("\nNot ignoring battery optimization!!!!!!\n");
+        if (REQUIRE_DISABLE_BATTERY_OPTIMIZATIONS) {
+            boolean ignoringBatteryOptimization = checkIsIgnoringBatteryOptimization();
+            if (!ignoringBatteryOptimization) {
+                sb.append("\nNot ignoring battery optimization!!!!!!\n");
+            }
         }
 
         sb.append("Network is metered: ").append(isActiveNetworkMetered(this));

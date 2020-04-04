@@ -173,15 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
         String downloadUrl = sharedPreferences.getString("download_url", "");
 
-        UrlValidationTask validationTask = urlValidationTask;
-        if (validationTask != null && validationTask.getDownloadUrlIsValidationResult() != null) {
-            String downloadUrlIsValidationResult = validationTask.getDownloadUrlIsValidationResult();
-            if (!downloadUrlIsValidationResult.isEmpty()) {
-                sb.append(downloadUrlIsValidationResult);
-                sb.append("<br/>");
-            }
-        }
-
         sb.append("<h1>Schedule</h1>");
         sb.append("    <b>[L-V]: </b>");
         sb.append(weekdayTime);
@@ -194,6 +185,15 @@ public class MainActivity extends AppCompatActivity {
         sb.append("    <b>Next alarm: </b>");
         sb.append(lastProgramedAlarm);
         sb.append("<br/>");
+        UrlValidationTask validationTask = urlValidationTask;
+        if (validationTask != null && validationTask.getDownloadUrlIsValidationResult() != null) {
+            String downloadUrlIsValidationResult = validationTask.getDownloadUrlIsValidationResult();
+            if (!downloadUrlIsValidationResult.isEmpty()) {
+                sb.append("<br/><h3>");
+                sb.append(downloadUrlIsValidationResult);
+                sb.append("</h3><br/>");
+            }
+        }
 
         sb.append("<br/><br/><br/><br/><br/><br/>");
         if (DownloadTask.getLastInstance() != null) {

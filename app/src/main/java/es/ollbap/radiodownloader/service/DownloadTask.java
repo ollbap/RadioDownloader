@@ -50,10 +50,19 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private DownloadStatus downloadStatus = DownloadStatus.NOT_STARTED;
 
     public enum DownloadStatus {
-        NOT_STARTED,
-        INTERRUPTED,
-        DOWNLOADING,
-        COMPLETED
+        NOT_STARTED("Not started"),
+        INTERRUPTED("Interrupted"),
+        DOWNLOADING("Downloading"),
+        COMPLETED("Completed");
+
+        String label;
+        DownloadStatus(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
     }
 
     public DownloadTask(Context context, boolean append) {

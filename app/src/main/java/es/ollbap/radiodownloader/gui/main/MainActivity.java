@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuCompat;
 import androidx.preference.PreferenceManager;
 
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -142,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshContent() {
-        TextView toolbar = findViewById(R.id.textview_first);
-        if (toolbar == null) {
+        TextView contentView = findViewById(R.id.textview_first);
+        if (contentView == null) {
             return;
         }
 
@@ -177,38 +178,34 @@ public class MainActivity extends AppCompatActivity {
             String downloadUrlIsValidationResult = validationTask.getDownloadUrlIsValidationResult();
             if (!downloadUrlIsValidationResult.isEmpty()) {
                 sb.append(downloadUrlIsValidationResult);
-                sb.append("\n");
+                sb.append("<br/>");
             }
         }
 
-        sb.append("[L-V]   ");
+        sb.append("<h1>Schedule</h1>");
+        sb.append("    <b>[L-V]: </b>");
         sb.append(weekdayTime);
-        sb.append("\n");
+        sb.append("<br/>");
 
-        sb.append("[S-D]   ");
+        sb.append("    <b>[S-D]: </b>");
         sb.append(weekendTime);
-        sb.append("\n");
-        sb.append("Next alarm: ");
+        sb.append("<br/>");
+
+        sb.append("    <b>Next alarm: </b>");
         sb.append(lastProgramedAlarm);
-        sb.append("\n");
+        sb.append("<br/>");
 
-        sb.append("\n");
-        sb.append(Util.getDownloadTaskProgress());
-
-
-        sb.append("\n\n\n\n");
-
-        if (REQUIRE_DISABLE_BATTERY_OPTIMIZATIONS) {
-            boolean ignoringBatteryOptimization = checkIsIgnoringBatteryOptimization(this);
-            if (!ignoringBatteryOptimization) {
-                sb.append("\nNot ignoring battery optimization!!!!!!\n");
-            }
+        sb.append("<br/><br/><br/><br/><br/><br/>");
+        if (DownloadTask.getLastInstance() != null) {
+            sb.append("<h1>Task</h1>");
+            sb.append("    <b>Status: </b>");
+            sb.append(Util.getDownloadTaskProgress());
+            sb.append("<br/>");
+            sb.append("    <b>Network is metered:</b> ").append(isActiveNetworkMetered(this));
+            sb.append("<br/>");
         }
 
-        sb.append("Network is metered: ").append(isActiveNetworkMetered(this));
-        sb.append("\n");
-
-        toolbar.setText(sb.toString());
+        contentView.setText(Html.fromHtml(sb.toString().replace(" ", "&nbsp;"), Html.FROM_HTML_MODE_COMPACT));
     }
 
 }

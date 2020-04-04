@@ -38,7 +38,6 @@ public class ForegroundService extends Service {
         String START_FOREGROUND = ACTION.class.getCanonicalName()+"START_FOREGROUND";
         String STOP_FOREGROUND = ACTION.class.getCanonicalName()+"STOP_FOREGROUND";
         String UPDATE_NOTIFICATION = ACTION.class.getCanonicalName()+"UPDATE_NOTIFICATION";
-        String PERIODIC_ALARM = ACTION.class.getCanonicalName()+"PERIODIC_ALARM";
         String VLC_START = ACTION.class.getCanonicalName()+"VLC_START";
     }
 
@@ -66,8 +65,6 @@ public class ForegroundService extends Service {
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_next, "Stop",
                         createServicePendingIntent(ACTION.STOP_FOREGROUND))
-                .addAction(android.R.drawable.ic_media_ff, "Alarm",
-                        createServicePendingIntent(ACTION.PERIODIC_ALARM))
                 .addAction(android.R.drawable.ic_media_play, "VLC",
                         createServicePendingIntent(ACTION.VLC_START));
 
@@ -106,8 +103,6 @@ public class ForegroundService extends Service {
                 onStopServiceAction();
             } else if (action.equals(ACTION.UPDATE_NOTIFICATION)) {
                 onUpdateNotificationAction();
-            } else if (action.equals(ACTION.PERIODIC_ALARM)) {
-                startPeriodicAlarm();
             } else if (action.equals(ACTION.VLC_START)) {
                 playInVlc(this);
             }
@@ -118,6 +113,10 @@ public class ForegroundService extends Service {
         }
     }
 
+    /**
+     * @deprecated Old application that started a periodic alarm.
+     */
+    @Deprecated
     private void startPeriodicAlarm() {
         Intent periodicAlarmIntent = new Intent(START_PERIODIC_AlARM_INTENT, null);
         sendBroadcast(periodicAlarmIntent);

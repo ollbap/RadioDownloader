@@ -257,7 +257,7 @@ public final class Util {
         String updateText = "Task is not running";
         DownloadTask instance = DownloadTask.getLastInstance();
         if (instance != null) {
-            updateText = "Download status "+instance.getDownloadStatus()+" "+instance.getDownloadedSizeTag();
+            updateText = instance.getDownloadStatus().getLabel() + " (" + instance.getDownloadedSizeTag()+")";
             if (instance.isAllowMetered()) {
                 updateText += "\n(metered allowed)";
             }

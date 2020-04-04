@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -417,7 +419,7 @@ public final class Util {
     public static void playInVlc(Context context) {
         try {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            long skipMilliseconds = sharedPreferences.getInt("player_skip_seconds", 0) * 1000l;
+            long skipMilliseconds = sharedPreferences.getInt("player_skip_seconds", 0) * 1000L;
 
             File outputFile = Configuration.getRadioOutputFile(context);
             String authority = context.getApplicationContext().getPackageName() + ".provider";
@@ -512,6 +514,18 @@ public final class Util {
             logD("Connection failed, will retry", e);
             return null;
         }
+    }
+
+    public static boolean checkIsIgnoringBatteryOptimization(Context context) {
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        assert pm != null;
+        return pm.isIgnoringBatteryOptimizations(context.getPackageName());
+    }
+
+    public static void openPowerSettings(Context context) {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+        context.startActivity(intent);
     }
 
 }

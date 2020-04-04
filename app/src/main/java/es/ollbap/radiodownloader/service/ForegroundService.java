@@ -16,7 +16,7 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import es.ollbap.radiodownloader.R;
-import es.ollbap.radiodownloader.gui.MainActivity;
+import es.ollbap.radiodownloader.gui.main.MainActivity;
 import es.ollbap.radiodownloader.util.Configuration;
 import es.ollbap.radiodownloader.util.Util;
 

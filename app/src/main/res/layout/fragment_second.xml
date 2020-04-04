@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.SecondFragment">
+    tools:context=".gui.main.SecondFragment">
 
     <Button
         android:id="@+id/button_test_10s"

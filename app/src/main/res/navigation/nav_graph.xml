@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="es.ollbap.radiodownloader.gui.FirstFragment"
+        android:name="es.ollbap.radiodownloader.gui.main.FirstFragment"
         android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="es.ollbap.radiodownloader.gui.SecondFragment"
+        android:name="es.ollbap.radiodownloader.gui.main.SecondFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
 

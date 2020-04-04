@@ -1,4 +1,4 @@
-package es.ollbap.radiodownloader.gui;
+package es.ollbap.radiodownloader.gui.main;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

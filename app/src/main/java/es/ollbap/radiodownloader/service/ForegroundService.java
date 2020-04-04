@@ -5,8 +5,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -59,15 +57,11 @@ public class ForegroundService extends Service {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_foreground);
-        Bitmap largeIcon = Bitmap.createScaledBitmap(icon, 128, 128, false);
-
         mBuilder
                 .setContentTitle("Radio download")
                 .setTicker("Radio download")
                 .setContentText("Download")
                 .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(largeIcon)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_next, "Stop",

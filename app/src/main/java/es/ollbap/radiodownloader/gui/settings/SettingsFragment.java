@@ -1,6 +1,8 @@
 package es.ollbap.radiodownloader.gui.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.preference.Preference;
@@ -14,6 +16,8 @@ import static java.util.Objects.requireNonNull;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
+
+    public static final String RADIO_STREAM_URL_DIRECTORY = "http://fmstream.org";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -46,6 +50,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         batteryOptimization.setOnPreferenceClickListener(p -> openBatteryOptimizationSettings());
         batteryOptimization.setTitle("Disable battery optimizations: " +
                 Util.checkIsIgnoringBatteryOptimization(requireNonNull(this.getContext())));
+
+        Preference downloadUrlsWeb = findPreference("download_urls_web");
+        assert downloadUrlsWeb != null;
+        downloadUrlsWeb.setOnPreferenceClickListener(p -> openDownloadUrlsWeb());
+    }
+
+    private boolean openDownloadUrlsWeb() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(RADIO_STREAM_URL_DIRECTORY));
+        startActivity(browserIntent);
+        return true;
     }
 
     private boolean openBatteryOptimizationSettings() {

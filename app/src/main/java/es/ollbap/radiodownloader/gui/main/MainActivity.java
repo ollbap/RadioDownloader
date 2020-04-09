@@ -196,11 +196,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         sb.append("<br/><br/><br/><br/><br/><br/>");
-        if (DownloadTask.getLastInstance() != null) {
+        DownloadTask downloadTask = DownloadTask.getLastInstance();
+        if (downloadTask != null) {
             sb.append("<h1>Task</h1>");
             sb.append("    <b>Status: </b>");
             sb.append(Util.getDownloadTaskProgress());
             sb.append("<br/>");
+            int retryCount = downloadTask.getRetryCount();
+            if (retryCount > 0) {
+                sb.append("    <b>Connection resumed: </b>").append(retryCount).append(" times");
+                sb.append("<br/>");
+            }
+            if (downloadTask.isAllowMetered()) {
+                sb.append("    <b>Metered usage allowed</b>");
+                sb.append("<br/>");
+            }
             sb.append("    <b>Network is metered:</b> ").append(isActiveNetworkMetered(this));
             sb.append("<br/>");
         }

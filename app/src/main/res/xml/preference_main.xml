@@ -9,9 +9,13 @@
             android:title="Enable download"
             android:defaultValue="true"
             />
+        <Preference
+            android:key="download_urls_web"
+            android:title="> Open radio stream URL directory on browser"
+            />
         <EditTextPreference
             android:key="download_url"
-            android:title="Download URL"
+            android:title="Set radio stream URL"
             android:defaultValue="https://playerservices.streamtheworld.com/pls/CADENASER.pls"/>
         <SeekBarPreference
             android:key="download_hours"

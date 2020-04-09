@@ -36,6 +36,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     private WeakReference<Context> contextReference;
     private int total = 0;
     private boolean append;
+
     private int retryCount = 0;
     private static final int WAIT_FOR_RETRY_SECONDS = 5;
 
@@ -279,14 +280,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     }
 
     public String getDownloadedSizeTag() {
-        String extra = "";
-        if (append) {
-            extra = " (appended!)";
-        }
-        if (retryCount > 0) {
-            extra += " (r " + retryCount + ")";
-        }
-        return String.format(Locale.ENGLISH, "%.2fMb"+extra, total / (1024.0*1024.0));
+        return String.format(Locale.ENGLISH, "%.2fMb", total / (1024.0*1024.0));
     }
 
     public void toggleMetered() {
@@ -304,5 +298,9 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             throw new IllegalStateException("Context reference was lost");
         }
         return context;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
     }
 }

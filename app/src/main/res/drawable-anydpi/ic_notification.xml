@@ -1,34 +1,34 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="153.47774"
-    android:viewportHeight="153.47774"
+    android:viewportWidth="169.27492"
+    android:viewportHeight="169.27492"
     android:tint="#FFFFFF">
-  <group android:translateX="6.1391096"
-      android:translateY="28.704002">
+  <group android:translateX="6.770997"
+      android:translateY="18.827627">
     <path
-        android:pathData="M123.636,50.756C112.485,28.022 112.493,-7.67 45.291,9.543"
+        android:pathData="m126.006,51.397c-11.15,-30.579 -6.248,-57.898 -73.45,-34.745"
         android:strokeAlpha="1"
         android:strokeLineJoin="miter"
-        android:strokeWidth="10"
+        android:strokeWidth="16"
         android:fillColor="#00000000"
         android:strokeColor="#000000"
         android:strokeLineCap="butt"/>
     <path
-        android:pathData="m4.465,86.187c-16.111,-25.31 23.405,-38.049 23.405,-38.049 0,0 125.929,-13.848 111.58,9.212 -13.814,22.2 51.362,38.592 -134.986,28.838z"
+        android:pathData="M11.73,118.855C-4.381,76.983 35.135,55.909 35.135,55.909c0,0 125.929,-22.909 111.58,15.239 -13.814,36.726 51.362,63.844 -134.986,47.707z"
         android:strokeAlpha="1"
         android:strokeLineJoin="miter"
-        android:strokeWidth="1.21885"
-        android:fillColor="#dca800"
+        android:strokeWidth="16"
+        android:fillColor="#00000000"
         android:strokeColor="#000000"
         android:fillType="evenOdd"
         android:fillAlpha="1"
         android:strokeLineCap="butt"/>
     <path
-        android:pathData="m23.423,8.828 l12.192,-6.357 3.951,17.763 -13.737,-0.59z"
+        android:pathData="m29.871,17.755 l10.369,-10.689 8.368,22.725 -13.642,1.8z"
         android:strokeAlpha="1"
         android:strokeLineJoin="miter"
-        android:strokeWidth="2.15166"
+        android:strokeWidth="2.49545"
         android:fillColor="#000000"
         android:strokeColor="#000000"
         android:fillAlpha="1"

@@ -195,7 +195,7 @@ public class ForegroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(LOG_TAG, "In onDestroy");
-        Toast.makeText(this, "Service Destroyed!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Download stopped", Toast.LENGTH_SHORT).show();
     }
 
     @Override

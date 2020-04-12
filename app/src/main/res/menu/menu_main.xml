@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="es.ollbap.radiodownloader.LegacyMainActivity">
+    tools:context="es.ollbap.radiodownloader.gui.main.MainActivity">
 
-    <item android:id="@+id/start_download"
-        app:showAsAction="ifRoom|withText"
-        android:title="Start download" />
 
     <group android:id="@+id/group_feature1">
+        <item android:id="@+id/start_download"
+            app:showAsAction="ifRoom|withText"
+            android:title="Start download" />
         <item android:id="@+id/cancel_download"
             app:showAsAction="ifRoom|withText"
             android:title="Cancel download" />

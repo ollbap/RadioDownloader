@@ -8,9 +8,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
@@ -46,6 +50,19 @@ public final class Util {
     private static final String CHARSET = "UTF-8";
     public static final String LAST_PROGRAMED_ALARM_PREFERENCE_KEY = "last_programed_alarm";
     private static Level configuredLevel = Level.INFO;
+
+    public static void showToast(Context context, String message) {
+        Handler mHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message handlerMessage) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        Message handlerMessage = mHandler.obtainMessage(1, null);
+        handlerMessage.sendToTarget();
+    }
+
     public enum Level {
         ERROR,
         WARNING,

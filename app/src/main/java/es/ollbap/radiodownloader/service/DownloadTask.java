@@ -107,6 +107,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         return lastInstance;
     }
 
+    public static boolean isRunning() {
+        if (lastInstance == null) {
+            return false;
+        }
+        return !lastInstance.getStatus().equals(Status.FINISHED);
+    }
+
     @Override
     protected String doInBackground(String... notUsed) {
         Instant startInstant = getCurrentInstant();
@@ -181,6 +188,10 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     }
 
     private DownloadIterationResult downloadStream(Instant startInstant, String url, OutputStream output) {
+        if (isCancelled()) {
+            return handleIsCancelled(startInstant);
+        }
+
         HttpURLConnection connection = null;
         InputStream input = null;
 
@@ -212,11 +223,10 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
                     return DownloadIterationResult.COMPLETE;
                 }
 
-                // allow canceling with back button
                 if (isCancelled()) {
-                    logI(String.format("Task canceled after %.2f minutes", elapsedTime.getSeconds() / 60.0));
-                    return DownloadIterationResult.COMPLETE;
+                    return handleIsCancelled(startInstant);
                 }
+
                 total += count;
 
                 if ((total - lastLog) > downloadLogRefreshInBytes) {
@@ -233,10 +243,12 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 
                 if (downloadStatus == DownloadStatus.INTERRUPTED) {
                     logI("Download resumed: " + getDownloadedSizeTag());
+                    Util.showToast(getContext(), "Download resumed");
                     lastLog = total;
                 }
                 if (downloadStatus == DownloadStatus.NOT_STARTED) {
                     logI("Download started");
+                    Util.showToast(getContext(), "Download started");
                     lastLog = total;
                 }
 
@@ -256,6 +268,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             return DownloadIterationResult.ERROR;
         } finally {
             downloadStatus = DownloadStatus.INTERRUPTED;
+            Util.showToast(getContext(), "Download interrupted");
             try {
                 if (input != null)
                     input.close();
@@ -265,6 +278,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             if (connection != null)
                 connection.disconnect();
         }
+    }
+
+    private DownloadIterationResult handleIsCancelled(Instant startInstant) {
+        Instant now = getCurrentInstant();
+        Duration elapsedTime = Duration.between(startInstant, now);
+        logI(String.format("Task canceled after %.2f minutes", elapsedTime.getSeconds() / 60.0));
+        return DownloadIterationResult.COMPLETE;
     }
 
     private HttpURLConnection createConnectionWithRetry(String url) {

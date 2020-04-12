@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -64,11 +65,23 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if(id == R.id.start_download) {
-            Util.startForegroundService(this);
+            askConfirmation(
+                    DownloadTask.isRunning(),
+                    "Download is in progress, force restart?",
+                    () -> Util.startForegroundService(this)
+            );
         }
 
         if(id == R.id.cancel_download) {
-            Util.stopForegroundService(this);
+            if (!DownloadTask.isRunning()) {
+                showMessage("Download is not in progress");
+            } else {
+                askConfirmation(
+                        DownloadTask.isRunning(),
+                        "Cancel download?",
+                        () -> Util.stopForegroundService(this)
+                );
+            }
         }
 
         if(id == R.id.open_radio_file) {
@@ -84,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(id == R.id.toggle_metered) {
+            if (!DownloadTask.isRunning()) {
+                showMessage("Download is not in progress, this applied only to an ongoing download");
+            }
             DownloadTask lastInstance = DownloadTask.getLastInstance();
             if (lastInstance != null) {
                 lastInstance.toggleMetered();
@@ -97,6 +113,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showMessage(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Message")
+                .setMessage(message)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {})
+                .show();
+    }
+
+    private void askConfirmation(boolean requireConfirmation, String message, Runnable action) {
+        if (requireConfirmation) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirmation")
+                    .setMessage(message)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> action.run())
+                    .setNegativeButton(android.R.string.no, null).show();
+        } else {
+            action.run();
+        }
+    }
+
+    private void askConfirmation(String message, Runnable action) {
+        askConfirmation(true, message, action);
     }
 
     private void requestPermissions() {
@@ -182,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         sb.append(weekendTime);
         sb.append("<br/>");
 
-        sb.append("    <b>Next alarm: </b>");
+        sb.append("    <b>Next download: </b>");
         sb.append(lastProgramedAlarm);
         sb.append("<br/>");
         UrlValidationTask validationTask = urlValidationTask;

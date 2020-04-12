@@ -261,6 +261,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             String message = e.getMessage();
             if (message != null && message.contains("Software caused connection abort")) {
                 logI("Connection was stopped by software, probably wifi was lost.");
+                Util.showToast(getContext(), "Download interrupted");
                 return DownloadIterationResult.CONNECTION_LOST;
             } else {
                 logE("Downloading Error " + message, e);
@@ -268,7 +269,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             return DownloadIterationResult.ERROR;
         } finally {
             downloadStatus = DownloadStatus.INTERRUPTED;
-            Util.showToast(getContext(), "Download interrupted");
             try {
                 if (input != null)
                     input.close();

@@ -32,6 +32,9 @@ public class ForegroundService extends Service {
     private WifiManager.WifiLock wifiLock;
     private DownloadTask downloadTask = null;
 
+    private final Object cancelLock = new Object();
+    private boolean alreadyStopped = false;
+
     public static final String START_PERIODIC_AlARM_INTENT = "es.pablo.my_profiles.START_PERIODIC_AlARM_INTENT";
 
     public interface ACTION {
@@ -42,7 +45,7 @@ public class ForegroundService extends Service {
     }
 
     public ForegroundService() {
-
+        Util.logD("ForegroundService created");
     }
 
     public NotificationManager getNotificationManager() {
@@ -132,12 +135,18 @@ public class ForegroundService extends Service {
     }
 
     private void onStopServiceAction() {
-        Util.cancelDownloadTask(downloadTask);
-        mBuilder = null;
-        releaseLocks();
-        stopForeground(true);
-        stopSelf();
-        logD("Service stopped");
+        synchronized (cancelLock) {
+            if (alreadyStopped) {
+                //Note that tasks will try to stop again on exit
+                return;
+            }
+            Util.cancelDownloadTask(downloadTask);
+            releaseLocks();
+            stopForeground(false);
+            stopSelf();
+            logD("Service stopped");
+            alreadyStopped = true;
+        }
     }
 
     private void requestLocks() {

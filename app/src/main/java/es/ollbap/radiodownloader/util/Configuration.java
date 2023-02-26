@@ -3,15 +3,26 @@ package es.ollbap.radiodownloader.util;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -51,8 +62,54 @@ public class Configuration {
         Configuration.createChannelsIfNeeded(context);
     }
 
-    public static File getRadioOutputFile(Context context) {
-        return new File(getOutputDirectory(context), Configuration.DOWNLOAD_FILE_NAME);
+    public static OutputStream getRadioOutputStream(Context context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+
+            // Define the time threshold for deleting old files
+            Instant threshold = Instant.now().minus(Duration.ofDays(7));
+            //Instant threshold = Instant.now().minus(Duration.ofSeconds(60));
+
+            // Define the query to retrieve the old files
+            String selection = MediaStore.Downloads.DISPLAY_NAME + " LIKE 'radioDownload_%' AND " +
+                    MediaStore.Downloads.DATE_ADDED + " < " + threshold.getEpochSecond();
+            Uri queryUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter(MediaStore.VOLUME_EXTERNAL_PRIMARY, "true").build();
+
+            // Test get values
+            Cursor cursor = context.getContentResolver().query(queryUri, null, selection, null, null);
+            if (cursor == null) {
+                throw new IllegalStateException("Can't find the file");
+            }
+            while (cursor.moveToNext()) {
+                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME));
+                long dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Downloads.DATE_ADDED));
+                Log.d("File Path", "Path of the most recently added file: " + path);
+            }
+            cursor.close();
+
+            // Perform the delete operation
+            int deleted = context.getContentResolver().delete(queryUri, selection, null);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+            ContentValues values = new ContentValues();
+            String fileName = "radioDownload_" +formatter.format(LocalDateTime.now()) + ".mp3";
+
+            values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+            values.put(MediaStore.Downloads.MIME_TYPE, "audio/mpeg");
+
+            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
+            if (uri == null) {
+                throw new IllegalStateException("File to write can't be opened");
+            }
+
+            try {
+                return context.getContentResolver().openOutputStream(uri);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new IllegalStateException("Unsupported android version");
+        }
     }
 
     @NonNull
@@ -74,5 +131,27 @@ public class Configuration {
         }
 
         return new File(getOutputDirectory(context), "radio_stream_"+logTimeStampCache+"_log.txt");
+    }
+
+    public static File getRadioOutputFile(Context context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            String[] projection = {MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME, MediaStore.Downloads.DATE_ADDED, MediaStore.Downloads.DATA};
+            String selection = MediaStore.Downloads.DISPLAY_NAME + " LIKE 'radioDownload_%' ";
+            String sortOrder = MediaStore.Downloads.DATE_ADDED + " DESC LIMIT 1";
+            Uri queryUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter(MediaStore.VOLUME_EXTERNAL_PRIMARY, "true").build();
+
+            Cursor cursor = context.getContentResolver().query(queryUri, projection, selection, null, sortOrder);
+            if (cursor == null) {
+                throw new IllegalStateException("Can't find the file");
+            }
+
+            cursor.moveToFirst();
+            String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Downloads.DATA));
+
+            cursor.close();
+            return new File(path);
+        } else {
+            throw new IllegalStateException("Unsupported android version");
+        }
     }
 }

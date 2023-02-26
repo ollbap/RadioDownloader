@@ -6,8 +6,6 @@ import android.os.AsyncTask;
 
 import androidx.preference.PreferenceManager;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -122,7 +120,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
             return null;
         }
 
-        File outputFile = Configuration.getRadioOutputFile(getContext());
         downloadUrl = resolveDownloadURL(downloadUrl, 5);
         if (downloadUrl == null) {
             logE("URL can not be resolved, exiting");
@@ -131,7 +128,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         logD("Downloading URL " + downloadUrl);
         int notWifiInARow = 0;
 
-        try (OutputStream output = new FileOutputStream(outputFile, append)) {
+        try (OutputStream output = Configuration.getRadioOutputStream(getContext())) {
             while (retryCount <= allowedErrorRetries) {
                 long retryStart = System.nanoTime();
                 DownloadIterationResult result = downloadStream(startInstant, downloadUrl, output);

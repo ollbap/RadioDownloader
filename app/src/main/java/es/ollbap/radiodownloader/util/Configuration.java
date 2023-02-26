@@ -65,6 +65,34 @@ public class Configuration {
     public static OutputStream getRadioOutputStream(Context context) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
 
+            deleteOldDownloads(context);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+            ContentValues values = new ContentValues();
+            String fileName = "radioDownload_" +formatter.format(LocalDateTime.now()) + ".mp3";
+
+            values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+            values.put(MediaStore.Downloads.MIME_TYPE, "audio/mpeg");
+            values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/radio_downloader");
+
+            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
+            if (uri == null) {
+                throw new IllegalStateException("File to write can't be opened");
+            }
+
+            try {
+                return context.getContentResolver().openOutputStream(uri);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new IllegalStateException("Unsupported android version");
+        }
+    }
+
+    private static void deleteOldDownloads(Context context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             // Define the time threshold for deleting old files
             Instant threshold = Instant.now().minus(Duration.ofDays(7));
             //Instant threshold = Instant.now().minus(Duration.ofSeconds(60));
@@ -88,27 +116,8 @@ public class Configuration {
 
             // Perform the delete operation
             int deleted = context.getContentResolver().delete(queryUri, selection, null);
-
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-            ContentValues values = new ContentValues();
-            String fileName = "radioDownload_" +formatter.format(LocalDateTime.now()) + ".mp3";
-
-            values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
-            values.put(MediaStore.Downloads.MIME_TYPE, "audio/mpeg");
-
-            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
-            if (uri == null) {
-                throw new IllegalStateException("File to write can't be opened");
-            }
-
-            try {
-                return context.getContentResolver().openOutputStream(uri);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
         } else {
-            throw new IllegalStateException("Unsupported android version");
+            throw new IllegalStateException();
         }
     }
 

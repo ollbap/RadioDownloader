@@ -470,7 +470,7 @@ public final class Util {
             vlcIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             vlcIntent.setPackage("org.videolan.vlc");
-            vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
+            // vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
             vlcIntent.setDataAndTypeAndNormalize(uri, "audio/*");
             vlcIntent.putExtra("title", "Radio Download");
             vlcIntent.putExtra("from_start", false);
